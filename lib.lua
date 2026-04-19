@@ -1854,35 +1854,28 @@ local Library = {
         end
 
         Library.Notification = function(Self, Name, Description, Duration)
+            local Icon = nil
+            if type(Name) == "table" then
+                Description = Name.Description or Name.description or ""
+                Duration = Name.Duration or Name.duration or 3
+                Icon = Name.Icon or Name.icon
+                Name = Name.Name or Name.name or "Fiber.cc"
+            end
+
             local Items = { } do 
                 Items["Notification"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Library.NotifHolder.Instance,
-                    Position = UDim2.new(-0.14000000059604645, 0, 0.7889317870140076, 0),
                     BorderSizePixel = 0,
                     AutomaticSize = Enum.AutomaticSize.XY,
-                    BackgroundColor3 = Library.Theme["Background"]
+                    BackgroundColor3 = Library.Theme["Background"],
+                    ClipsDescendants = true
                 }):AddToTheme({BackgroundColor3 = 'Background'})
                 
                 Library:Create("UICorner", {
                     Name = "\0",
                     Parent = Items["Notification"].Instance
                 })
-                
-                Items["Text"] = Library:Create("TextLabel", {
-                    Name = "\0",
-                    FontFace = Library.Font,
-                    TextSize = Library.FontSize,
-                    Parent = Items["Notification"].Instance,
-                    TextColor3 = Library.Theme["Text"],
-                    Text = Name,
-                    AnchorPoint = Vector2.new(1, 0),
-                    Size = UDim2.new(0, 0, 0, 15),
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(1, 0, 0, 0),
-                    BorderSizePixel = 0,
-                    AutomaticSize = Enum.AutomaticSize.X
-                }):AddToTheme({TextColor3 = 'Text'})
                 
                 Library:Create("UIPadding", {
                     Name = "\0",
@@ -1892,19 +1885,76 @@ local Library = {
                     PaddingRight = UDim.new(0, 10),
                     PaddingLeft = UDim.new(0, 10)
                 })
+
+                local Content = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["Notification"].Instance,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    AutomaticSize = Enum.AutomaticSize.XY
+                })
+
+                Library:Create("UIListLayout", {
+                    Name = "\0",
+                    Parent = Content.Instance,
+                    SortOrder = Enum.SortOrder.LayoutOrder,
+                    FillDirection = Enum.FillDirection.Horizontal,
+                    VerticalAlignment = Enum.VerticalAlignment.Center,
+                    Padding = UDim.new(0, 10)
+                })
+
+                if Icon then
+                    Items["Icon"] = Library:Create("ImageLabel", {
+                        Name = "\0",
+                        Parent = Content.Instance,
+                        Size = UDim2.new(0, 32, 0, 32),
+                        BackgroundTransparency = 1,
+                        Image = Icon,
+                        ImageColor3 = Library.Theme["Accent"]
+                    }):AddToTheme({ImageColor3 = 'Accent'})
+                end
+
+                local TextContent = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Content.Instance,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    AutomaticSize = Enum.AutomaticSize.XY
+                })
+
+                Library:Create("UIListLayout", {
+                    Name = "\0",
+                    Parent = TextContent.Instance,
+                    SortOrder = Enum.SortOrder.LayoutOrder,
+                    Padding = UDim.new(0, 2)
+                })
+                
+                Items["Text"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = Library.FontSize,
+                    Parent = TextContent.Instance,
+                    TextColor3 = Library.Theme["Text"],
+                    Text = Name,
+                    Size = UDim2.new(0, 0, 0, 16),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    TextXAlignment = Enum.TextXAlignment.Left
+                }):AddToTheme({TextColor3 = 'Text'})
                 
                 Items["Description"] = Library:Create("TextLabel", {
                     Name = "\0",
                     FontFace = Library.Font,
-                    TextSize = Library.FontSize,
-                    Parent = Items["Notification"].Instance,
+                    TextSize = Library.FontSize - 2,
+                    Parent = TextContent.Instance,
                     TextColor3 = Library.Theme["Inactive Text"],
                     Text = Description,
-                    Size = UDim2.new(0, 0, 0, 15),
+                    Size = UDim2.new(0, 0, 0, 14),
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 0, 24),
                     BorderSizePixel = 0,
-                    AutomaticSize = Enum.AutomaticSize.X
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    TextXAlignment = Enum.TextXAlignment.Left
                 }):AddToTheme({TextColor3 = 'Inactive Text'})                
             end
 
@@ -1913,45 +1963,47 @@ local Library = {
                     Value.Instance.BackgroundTransparency = 1
                 elseif Value.Instance:IsA("TextLabel") then 
                     Value.Instance.TextTransparency = 1
+                elseif Value.Instance:IsA("ImageLabel") then
+                    Value.Instance.ImageTransparency = 1
                 end
             end 
 
-            local GetSize = function()
-                local AbsSize = Items["Notification"].Instance.AbsoluteSize
-                Items["Notification"].Instance.AutomaticSize = Enum.AutomaticSize.None
-                task.wait()
-                Items["Notification"].Instance.Size = UDim2.new(0, AbsSize.X, 0, AbsSize.Y)
-                return AbsSize
-            end
-
-            local Size = GetSize()
-            task.wait()
-            Items["Notification"].Instance.Size = UDim2.new(0, 0, 0, Size.Y)
-
-            local Info = TweenInfo.new(0.85, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out, 0, false, 0)
-
             Library:Thread(function()
+                RunService.RenderStepped:Wait()
+                local Size = Items["Notification"].Instance.AbsoluteSize
+                
+                Items["Notification"].Instance.AutomaticSize = Enum.AutomaticSize.None
+                Items["Notification"].Instance.Size = UDim2.new(0, 0, 0, Size.Y)
+
+                local Info = TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+
                 for Index, Value in Items do 
                     if Value.Instance:IsA("Frame") then
                         Value:Tween({BackgroundTransparency = 0}, Info)
                     elseif Value.Instance:IsA("TextLabel") then 
                         Value:Tween({TextTransparency = 0}, Info)
+                    elseif Value.Instance:IsA("ImageLabel") then
+                        Value:Tween({ImageTransparency = 0}, Info)
                     end
                 end
 
                 Items["Notification"]:Tween({Size = UDim2.new(0, Size.X, 0, Size.Y)}, Info)
 
-                task.delay(Duration + 0.1, function()
+                task.delay(Duration, function()
+                    local CloseInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+                    
                     for Index, Value in Items do 
                         if Value.Instance:IsA("Frame") then
-                            Value:Tween({BackgroundTransparency = 1})
+                            Value:Tween({BackgroundTransparency = 1}, CloseInfo)
                         elseif Value.Instance:IsA("TextLabel") then 
-                            Value:Tween({TextTransparency = 1})
+                            Value:Tween({TextTransparency = 1}, CloseInfo)
+                        elseif Value.Instance:IsA("ImageLabel") then
+                            Value:Tween({ImageTransparency = 1}, CloseInfo)
                         end
                     end
 
-                    Items["Notification"]:Tween({Size = UDim2.new(0, 0, 0, 0)}, Info)
-                    task.wait(0.5)
+                    Items["Notification"]:Tween({Size = UDim2.new(0, 0, 0, Size.Y)}, CloseInfo)
+                    task.wait(0.4)
                     Items["Notification"].Instance:Destroy()
                 end)
             end)
