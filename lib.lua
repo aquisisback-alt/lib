@@ -45,7 +45,7 @@ local Library = {
         Configs = "/Configs"
     },
 
-    FontSize = 14,
+    FontSize = 15,
 
     Animation = {
         Time = 0.3,
@@ -2156,7 +2156,7 @@ local Library = {
                 Items["Title"] = Library:Create("TextLabel", {
                     Name = "\0",
                     FontFace = Library.Font,
-                    TextSize = 18,
+                    TextSize = 20,
                     Parent = Items["Top"].Instance,
                     TextColor3 = Library.Theme["Text"],
                     Text = Window.Name,
@@ -2266,6 +2266,24 @@ local Library = {
                     Size = UDim2.new(1, -200, 1, -60),
                     BorderSizePixel = 0
                 })
+
+                Items["ExitButton"] = Library:Create("TextButton", {
+                    Name = "\0",
+                    Parent = Items["Topbar"].Instance,
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    Position = UDim2.new(1, -15, 0.5, 0),
+                    Size = UDim2.new(0, 30, 0, 30),
+                    BackgroundTransparency = 1,
+                    Text = "X",
+                    TextColor3 = Library.Theme["Text"],
+                    TextSize = 20,
+                    FontFace = Library.Font,
+                    AutoButtonColor = false
+                }):AddToTheme({TextColor3 = 'Text'})
+
+                Items["ExitButton"]:Connect("MouseButton1Down", function()
+                    Library:Exit()
+                end)
 
                 Window.Items = Items
             end
@@ -3072,6 +3090,10 @@ local Library = {
             end
 
             function Slider:Set(Value)
+                if tostring(Value) == "nan" or Value == nil then 
+                    Value = Slider.Min 
+                end
+                
                 Slider.Value = Library:Round(math.clamp(Value, Slider.Min, Slider.Max), Slider.Decimals)
 
                 Items["Accent"]:Tween({Size = UDim2.new((Slider.Value - Slider.Min) / (Slider.Max - Slider.Min), 0, 1, 0)}, TweenInfo.new(Library.Animation.Time, Enum.EasingStyle.Quart, Enum.EasingDirection.Out))
