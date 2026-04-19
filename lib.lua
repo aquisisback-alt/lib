@@ -45,7 +45,7 @@ local Library = {
         Configs = "/Configs"
     },
 
-    FontSize = 15,
+    FontSize = 16,
 
     Animation = {
         Time = 0.3,
@@ -631,9 +631,9 @@ local Library = {
         return Success, Result
     end
 
-    Library.Round = function(Self, Number, Float)
-        local Multiplier = 1 / (Float or 1)
-        return math.floor(Number * Multiplier) / Multiplier
+    Library.Round = function(Self, Number, Decimals)
+        local Multiplier = 10 ^ (Decimals or 0)
+        return math.floor(Number * Multiplier + 0.5) / Multiplier
     end
 
     Library.GetConfig = function(Self)
@@ -2272,14 +2272,21 @@ local Library = {
                     Parent = Items["Topbar"].Instance,
                     AnchorPoint = Vector2.new(1, 0.5),
                     Position = UDim2.new(1, -15, 0.5, 0),
-                    Size = UDim2.new(0, 30, 0, 30),
-                    BackgroundTransparency = 1,
+                    Size = UDim2.new(0, 24, 0, 24),
+                    BackgroundColor3 = Color3.fromRGB(200, 50, 50),
+                    BackgroundTransparency = 0,
                     Text = "X",
-                    TextColor3 = Library.Theme["Text"],
-                    TextSize = 20,
+                    TextColor3 = Color3.fromRGB(255, 255, 255),
+                    TextSize = 14,
                     FontFace = Library.Font,
-                    AutoButtonColor = false
-                }):AddToTheme({TextColor3 = 'Text'})
+                    AutoButtonColor = true
+                })
+
+                Library:Create("UICorner", {
+                    Name = "\0",
+                    Parent = Items["ExitButton"].Instance,
+                    CornerRadius = UDim.new(0, 6)
+                })
 
                 Items["ExitButton"]:Connect("MouseButton1Down", function()
                     Library:Exit()
