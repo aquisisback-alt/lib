@@ -4076,14 +4076,16 @@ local Library = {
                     end
                 })
 
-                ConfigsSection:Toggle({
-                    Name = "Watermark",
-                    Flag = "Watermark",
-                    Default = true,
-                    Callback = function(Value)
-                        Self.Watermark:SetVisibility(Value)
-                    end
-                })
+                if type(Self.Watermark) == "table" then
+                    ConfigsSection:Toggle({
+                        Name = "Watermark",
+                        Flag = "Watermark",
+                        Default = true,
+                        Callback = function(Value)
+                            Self.Watermark:SetVisibility(Value)
+                        end
+                    })
+                end
 
                 Library:GetConfigsList(ConfigsDropdown)
             end
