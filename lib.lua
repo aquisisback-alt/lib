@@ -45,7 +45,7 @@ local Library = {
         Configs = "/Configs"
     },
 
-    FontSize = 17,
+    FontSize = 14,
 
     Animation = {
         Time = 0.3,
@@ -2156,7 +2156,7 @@ local Library = {
                 Items["Title"] = Library:Create("TextLabel", {
                     Name = "\0",
                     FontFace = Library.Font,
-                    TextSize = 25,
+                    TextSize = 18,
                     Parent = Items["Top"].Instance,
                     TextColor3 = Library.Theme["Text"],
                     Text = Window.Name,
