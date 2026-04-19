@@ -2272,21 +2272,14 @@ local Library = {
                     Parent = Items["Topbar"].Instance,
                     AnchorPoint = Vector2.new(1, 0.5),
                     Position = UDim2.new(1, -15, 0.5, 0),
-                    Size = UDim2.new(0, 24, 0, 24),
-                    BackgroundColor3 = Color3.fromRGB(200, 50, 50),
-                    BackgroundTransparency = 0,
+                    Size = UDim2.new(0, 30, 0, 30),
+                    BackgroundTransparency = 1,
                     Text = "X",
-                    TextColor3 = Color3.fromRGB(255, 255, 255),
-                    TextSize = 14,
+                    TextColor3 = Library.Theme["Text"],
+                    TextSize = 18,
                     FontFace = Library.Font,
-                    AutoButtonColor = true
-                })
-
-                Library:Create("UICorner", {
-                    Name = "\0",
-                    Parent = Items["ExitButton"].Instance,
-                    CornerRadius = UDim.new(0, 6)
-                })
+                    AutoButtonColor = false
+                }):AddToTheme({TextColor3 = 'Text'})
 
                 Items["ExitButton"]:Connect("MouseButton1Down", function()
                     Library:Exit()
