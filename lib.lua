@@ -3983,6 +3983,12 @@ local Library = {
         end
 
         Library.InitWindow = function(Self)
+            if Self.Initialized then 
+                return 
+            end
+
+            Self.Initialized = true
+
             local SettingsPage = Self:Page({Name = "Settings", Icon = "rbxassetid://122377900702229"})
 
             local ConfigsSection = SettingsPage:Section({Name = "Configs", Side = 1})
