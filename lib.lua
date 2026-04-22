@@ -633,9 +633,14 @@ local Library = {
     end
 
     Library.Round = function(Self, Number, Float)
-        if not Float or Float <= 0 then 
+        Number = tonumber(Number) or 0
+        Float = tonumber(Float) or 0
+        if Number ~= Number then Number = 0 end
+        
+        if Float <= 0 then 
             return math.floor(Number + 0.5) 
         end
+        
         local Multiplier = 1 / Float
         return math.floor(Number * Multiplier + 0.5) / Multiplier
     end
@@ -3082,11 +3087,15 @@ local Library = {
             end
 
             function Slider:Set(Value)
-                Value = tonumber(Value) or Slider.Default or Slider.Min
+                Value = tonumber(Value) or Slider.Default or Slider.Min or 0
+                if Value ~= Value then Value = Slider.Default or 0 end
+                
                 Slider.Value = Library:Round(math.clamp(Value, Slider.Min, Slider.Max), Slider.Decimals)
+                if Slider.Value ~= Slider.Value then Slider.Value = Slider.Default or 0 end
 
                 local Range = Slider.Max - Slider.Min
                 local Progress = (Range == 0) and 0 or (Slider.Value - Slider.Min) / Range
+                if Progress ~= Progress then Progress = 0 end
                 
                 Items["Accent"]:Tween({Size = UDim2.new(Progress, 0, 1, 0)}, TweenInfo.new(Library.Animation.Time, Enum.EasingStyle.Quart, Enum.EasingDirection.Out))
                 Items["Value"].Instance.Text = string.format("%s%s", Slider.Value, Slider.Suffix)
