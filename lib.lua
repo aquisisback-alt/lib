@@ -2158,7 +2158,7 @@ local Library = {
                 Items["Title"] = Library:Create("TextLabel", {
                     Name = "\0",
                     FontFace = Library.Font,
-                    TextSize = 25,
+                    TextSize = 20,
                     Parent = Items["Top"].Instance,
                     TextColor3 = Library.Theme["Text"],
                     Text = Window.Name,
@@ -3079,9 +3079,13 @@ local Library = {
             end
 
             function Slider:Set(Value)
+                Value = tonumber(Value) or Slider.Default or Slider.Min
                 Slider.Value = Library:Round(math.clamp(Value, Slider.Min, Slider.Max), Slider.Decimals)
 
-                Items["Accent"]:Tween({Size = UDim2.new((Slider.Value - Slider.Min) / (Slider.Max - Slider.Min), 0, 1, 0)}, TweenInfo.new(Library.Animation.Time, Enum.EasingStyle.Quart, Enum.EasingDirection.Out))
+                local Range = Slider.Max - Slider.Min
+                local Progress = (Range == 0) and 0 or (Slider.Value - Slider.Min) / Range
+                
+                Items["Accent"]:Tween({Size = UDim2.new(Progress, 0, 1, 0)}, TweenInfo.new(Library.Animation.Time, Enum.EasingStyle.Quart, Enum.EasingDirection.Out))
                 Items["Value"].Instance.Text = string.format("%s%s", Slider.Value, Slider.Suffix)
 
                 if Slider.Value == Slider.Min then
@@ -3099,8 +3103,9 @@ local Library = {
             end
 
             function Slider:GetSize(Input)
-                local SizeX = (Input.Position.X - Items["RealSlider"].Instance.AbsolutePosition.X) / Items["RealSlider"].Instance.AbsoluteSize.X
-                local Value = ((Slider.Max - Slider.Min) * SizeX) + Slider.Min
+                local AbsSize = Items["RealSlider"].Instance.AbsoluteSize.X
+                local SizeX = (AbsSize == 0) and 0 or (Input.Position.X - Items["RealSlider"].Instance.AbsolutePosition.X) / AbsSize
+                local Value = ((Slider.Max - Slider.Min) * math.clamp(SizeX, 0, 1)) + Slider.Min
 
                 return Value
             end
