@@ -633,8 +633,11 @@ local Library = {
     end
 
     Library.Round = function(Self, Number, Float)
-        local Multiplier = 1 / (Float or 1)
-        return math.floor(Number * Multiplier) / Multiplier
+        if not Float or Float <= 0 then 
+            return math.floor(Number + 0.5) 
+        end
+        local Multiplier = 1 / Float
+        return math.floor(Number * Multiplier + 0.5) / Multiplier
     end
 
     Library.GetConfig = function(Self)
@@ -2158,7 +2161,7 @@ local Library = {
                 Items["Title"] = Library:Create("TextLabel", {
                     Name = "\0",
                     FontFace = Library.Font,
-                    TextSize = 20,
+                    TextSize = 18,
                     Parent = Items["Top"].Instance,
                     TextColor3 = Library.Theme["Text"],
                     Text = Window.Name,
