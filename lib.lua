@@ -1967,6 +1967,7 @@ local Library = {
         end
 
         Library.Watermark = function(Self, Params)
+            if IsMobile then return end
             Params = Params or { }
             
             local Watermark = {
@@ -2089,7 +2090,7 @@ local Library = {
                     AnchorPoint = Vector2.new(0.5, 0.5),
                     BackgroundTransparency = 0.10000000149011612,
                     Position = UDim2.new(0.5, 0, 0.5, 0),
-                    Size = UDim2.new(0, 878, 0, 601),
+                    Size = IsMobile and UDim2.new(0, 1100, 0, 601) or UDim2.new(0, 878, 0, 601),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"]
                 }):AddToTheme({BackgroundColor3 = 'Background'})
@@ -2343,7 +2344,11 @@ local Library = {
                     Thickness = 2
                 }):AddToTheme({Color = 'Accent'})
 
-                MobileToggle:Connect("MouseButton1Down", function()
+                MobileToggle:Connect("MouseButton1Click", function()
+                    Window:SetOpen(not Window.IsOpen)
+                end)
+
+                MobileToggle:Connect("TouchTap", function()
                     Window:SetOpen(not Window.IsOpen)
                 end)
 
