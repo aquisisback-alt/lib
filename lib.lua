@@ -2089,7 +2089,7 @@ local Library = {
                     AnchorPoint = Vector2.new(0.5, 0.5),
                     BackgroundTransparency = 0.10000000149011612,
                     Position = UDim2.new(0.5, 0, 0.5, 0),
-                    Size = IsMobile and UDim2.new(0, 500, 0, 350) or UDim2.new(0, 878, 0, 601),
+                    Size = UDim2.new(0, 878, 0, 601),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"]
                 }):AddToTheme({BackgroundColor3 = 'Background'})
@@ -2097,7 +2097,7 @@ local Library = {
                 if IsMobile then 
                     Library:Create("UIScale", {
                         Parent = Items["MainFrame"].Instance,
-                        Scale = 1.2
+                        Scale = 0.55 -- Scale down to fit mobile screens
                     })
                 end
                 
