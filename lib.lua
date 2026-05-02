@@ -30,7 +30,7 @@ gethui = gethui or function() return CoreGui end
 
 --#region Variables 
 local LocalPlayer = Players.LocalPlayer
-local IsMobile = UserInputService.TouchEnabled or false
+local IsMobile = UserInputService.TouchEnabled or GuiService:IsTenFootInterface() or false
 local Camera = Workspace.CurrentCamera
 local GuiInset = GuiService:GetGuiInset().Y
 local Mouse = cloneref(LocalPlayer:GetMouse())
@@ -2317,12 +2317,12 @@ local Library = {
                 end
             end)
 
-            if IsMobile then
+            if IsMobile or UserInputService.TouchEnabled then
                 local MobileToggle = Library:Create("TextButton", {
                     Name = "\0",
                     Parent = Library.Holder.Instance,
-                    Size = UDim2.new(0, 45, 0, 45),
-                    Position = UDim2.new(0, 10, 0, 10),
+                    Size = UDim2.new(0, 50, 0, 55),
+                    Position = UDim2.new(0, 0, 0, 5),
                     BackgroundColor3 = Color3.fromRGB(0, 0, 0),
                     Text = "F",
                     TextColor3 = Color3.fromRGB(255, 255, 255),
