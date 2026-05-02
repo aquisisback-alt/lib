@@ -2083,23 +2083,23 @@ local Library = {
             }
 
             local Items = { } do 
-                if IsMobile then 
-                    Library:Create("UIScale", {
-                        Parent = Items["MainFrame"],
-                        Scale = 0.4
-                    })
-                end
-
                 Items["MainFrame"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Library.Holder.Instance,
                     AnchorPoint = Vector2.new(0.5, 0.5),
                     BackgroundTransparency = 0.10000000149011612,
                     Position = UDim2.new(0.5, 0, 0.5, 0),
-                    Size = UDim2.new(0, 878, 0, 601),
+                    Size = IsMobile and UDim2.new(0, 500, 0, 350) or UDim2.new(0, 878, 0, 601),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"]
                 }):AddToTheme({BackgroundColor3 = 'Background'})
+
+                if IsMobile then 
+                    Library:Create("UIScale", {
+                        Parent = Items["MainFrame"].Instance,
+                        Scale = 1.2
+                    })
+                end
                 
                 Items["MainFrame"]:MakeDraggable()
                 Items["MainFrame"]:MakeResizeable(Vector2.new(Items["MainFrame"].Instance.AbsoluteSize.X, Items["MainFrame"].Instance.AbsoluteSize.Y))
@@ -2315,6 +2315,40 @@ local Library = {
                     Window:SetOpen(not Window.IsOpen)
                 end
             end)
+
+            if IsMobile then
+                local MobileToggle = Library:Create("TextButton", {
+                    Name = "\0",
+                    Parent = Library.Holder.Instance,
+                    Size = UDim2.new(0, 45, 0, 45),
+                    Position = UDim2.new(0, 10, 0, 10),
+                    BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                    Text = "F",
+                    TextColor3 = Color3.fromRGB(255, 255, 255),
+                    TextSize = 24,
+                    FontFace = Library.Font,
+                    BorderSizePixel = 0,
+                    AutoButtonColor = true,
+                    ZIndex = 100
+                })
+
+                Library:Create("UICorner", {
+                    Parent = MobileToggle.Instance,
+                    CornerRadius = UDim.new(1, 0)
+                })
+
+                Library:Create("UIStroke", {
+                    Parent = MobileToggle.Instance,
+                    Color = Library.Theme["Accent"],
+                    Thickness = 2
+                }):AddToTheme({Color = 'Accent'})
+
+                MobileToggle:Connect("MouseButton1Down", function()
+                    Window:SetOpen(not Window.IsOpen)
+                end)
+
+                MobileToggle:MakeDraggable()
+            end
 
             Window:Center()
             return setmetatable(Window, Library)
