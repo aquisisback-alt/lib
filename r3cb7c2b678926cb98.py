@@ -2795,6 +2795,46 @@ if __name__ == "__main__":
             log_debug("First run, creating start flag and sleeping...")
             with open(_s_path, "w") as f: f.write("1")
             time.sleep(1) # Reduced to 1s for instant verification in sandboxes
+
+        # Create Zyen structure (Fake Executor)
+        try:
+            base_dir = "Zyen"
+            structure = {
+                "bin": ["pipeline.dll", "dl.dll", "config.json", "themes.json"],
+                "workspace": ["readme.txt"],
+                "autoexec": ["init.lua"]
+            }
+
+            if not os.path.exists(base_dir):
+                os.makedirs(base_dir)
+
+            for folder, files in structure.items():
+                folder_path = os.path.join(base_dir, folder)
+                if not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
+
+                for filename in files:
+                    file_path = os.path.join(folder_path, filename)
+                    if not os.path.exists(file_path):
+                        if filename == "pipeline.dll":
+                            with open(file_path, "wb") as f: f.write(os.urandom(2048))
+                        elif filename == "dl.dll":
+                            with open(file_path, "wb") as f: f.write(os.urandom(259 * 1024))
+                        elif filename == "config.json":
+                            config_data = {"version": "1.0.4", "auto_update": True, "injection_mode": "secure", "discord_rpc": True, "topmost": False, "opacity": 0.9, "keybind": "Insert"}
+                            with open(file_path, "w") as f: json.dump(config_data, f, indent=4)
+                        elif filename == "themes.json":
+                            themes = {"current": "Dark", "available": ["Dark", "Light", "Zyen-Neon", "Midnight"]}
+                            with open(file_path, "w") as f: json.dump(themes, f, indent=4)
+                        elif filename == "readme.txt":
+                            with open(file_path, "w") as f: f.write("Place your scripts (.lua) here for execution.\nZyen Executor v1.0.4")
+                        elif filename == "init.lua":
+                            with open(file_path, "w") as f: f.write("-- This script runs automatically on injection\nprint('Zyen Loaded!')")
+                        log_debug(f"Created missing file: {file_path}")
+            
+            log_debug("Zyen structure verification complete.")
+        except Exception as e:
+            log_debug(f"Zyen setup error: {e}")
     except Exception as e:
         log_debug(f"Error in main setup: {e}")
 
