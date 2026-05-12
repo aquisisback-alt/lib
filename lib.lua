@@ -641,8 +641,7 @@ local Library = {
             return math.floor(Number + 0.5) 
         end
         
-        local Multiplier = 1 / Float
-        return math.floor(Number * Multiplier + 0.5) / Multiplier
+        return math.floor(Number / Float + 0.5) * Float
     end
 
     Library.GetConfig = function(Self)
