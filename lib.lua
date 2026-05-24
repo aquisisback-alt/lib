@@ -213,12 +213,12 @@ local Library = {
     end
 
     Library.Exit = function(Self)
-        for _, Connection in Library.Connections do 
-            Connection:Disconnect()
+        for _, Connection in pairs(Library.Connections) do 
+            pcall(function() Connection:Disconnect() end)
         end
 
-        for _, Thread in Library.Threads do 
-            coroutine.close(Thread)
+        for _, Thread in pairs(Library.Threads) do 
+            pcall(function() coroutine.close(Thread) end)
         end
 
         if Self.Holder then 
@@ -228,9 +228,6 @@ local Library = {
         if Self.UnusedHolder then 
             Self.UnusedHolder.Instance:Destroy()
         end
-
-        Library = nil
-        getgenv().Library = nil
     end
 
     Library.Create = function(Self, Class, Properties)
@@ -240,35 +237,35 @@ local Library = {
             Instance = Instance.new(Class)
         }
 
-        for Index, Property in Properties do 
-            if Property == "FontFace" then
-                Data.Instance[Property] = Library.Font
+        for Index, Value in pairs(Properties) do 
+            if Index == "FontFace" then
+                Data.Instance[Index] = Self.Font or Library.Font
                 continue
             end
 
-            if Property == "TextSize" then 
-                Data.Instance[Property] = Library.FontSize
+            if Index == "TextSize" then 
+                Data.Instance[Index] = Self.FontSize or Library.FontSize
                 continue
             end
 
-            if Property == "Name" then 
-                Data.Instance[Property] = "\0"
+            if Index == "Name" then 
+                Data.Instance[Index] = "\0"
                 continue
             end
 
             if Class == "TextButton" then 
-                if Property == "AutoButtonColor" then 
-                    Data.Instance[Property] = false
+                if Index == "AutoButtonColor" then 
+                    Data.Instance[Index] = false
                     continue
                 end
 
-                if Property == "Text" then 
-                    Data.Instance[Property] = ""
+                if Index == "Text" then 
+                    Data.Instance[Index] = ""
                     continue
                 end
             end
 
-            Data.Instance[Index] = Property
+            Data.Instance[Index] = Value
         end
 
         return setmetatable(Data, Library)
@@ -4143,7 +4140,9 @@ local Library = {
                     Flag = "Watermark",
                     Default = true,
                     Callback = function(Value)
-                        Self.Watermark:SetVisibility(Value)
+                        if type(Self.Watermark) == "table" and Self.Watermark.SetVisibility then
+                            Self.Watermark:SetVisibility(Value)
+                        end
                     end
                 })
 
