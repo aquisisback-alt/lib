@@ -213,12 +213,12 @@ local Library = {
     end
 
     Library.Exit = function(Self)
-        for _, Connection in pairs(Library.Connections) do 
-            pcall(function() Connection:Disconnect() end)
+        for _, Connection in Library.Connections do 
+            Connection:Disconnect()
         end
 
-        for _, Thread in pairs(Library.Threads) do 
-            pcall(function() coroutine.close(Thread) end)
+        for _, Thread in Library.Threads do 
+            coroutine.close(Thread)
         end
 
         if Self.Holder then 
@@ -228,40 +228,47 @@ local Library = {
         if Self.UnusedHolder then 
             Self.UnusedHolder.Instance:Destroy()
         end
+
+        Library = nil
+        getgenv().Library = nil
     end
 
     Library.Create = function(Self, Class, Properties)
-        local lib = Self or Library
         local Data = {
             Class = Class,
             Properties = Properties,
             Instance = Instance.new(Class)
         }
 
-        for Index, Value in pairs(Properties) do 
-            if Index == "FontFace" then
-                Data.Instance[Index] = lib.Font
+        for Index, Property in Properties do 
+            if Property == "FontFace" then
+                Data.Instance[Property] = Library.Font
                 continue
             end
 
-            if Index == "TextSize" then 
-                Data.Instance[Index] = lib.FontSize
+            if Property == "TextSize" then 
+                Data.Instance[Property] = Library.FontSize
+                continue
+            end
+
+            if Property == "Name" then 
+                Data.Instance[Property] = "\0"
                 continue
             end
 
             if Class == "TextButton" then 
-                if Index == "AutoButtonColor" then 
-                    Data.Instance[Index] = false
+                if Property == "AutoButtonColor" then 
+                    Data.Instance[Property] = false
                     continue
                 end
 
-                if Index == "Text" then 
-                    Data.Instance[Index] = ""
+                if Property == "Text" then 
+                    Data.Instance[Property] = ""
                     continue
                 end
             end
 
-            Data.Instance[Index] = Value
+            Data.Instance[Index] = Property
         end
 
         return setmetatable(Data, Library)
@@ -657,6 +664,10 @@ local Library = {
             return
         end
 
+        if Library.SaveCustomData then
+            Config.ExternalData = Library.SaveCustomData()
+        end
+
         return HttpService:JSONEncode(Config)
     end
 
@@ -665,6 +676,7 @@ local Library = {
 
         local Success, Result = Library:SafeCall(function()
             for Index, Value in Decoded do 
+                if Index == "ExternalData" then continue end
                 local SetFunction = Library.SetFlags[Index]
 
                 if not SetFunction then
@@ -678,6 +690,10 @@ local Library = {
                 else
                     SetFunction(Value)
                 end
+            end
+
+            if Decoded.ExternalData and Library.LoadCustomData then
+                Library.LoadCustomData(Decoded.ExternalData)
             end
         end)
 
@@ -3709,7 +3725,7 @@ local Library = {
                 Items["SearchIcon"]:Tween({ImageColor3 = Library.Theme["Inactive Text"]})
             end)
 
-            for Index, Value in pairs(Dropdown.OptionItems) do 
+            for Index, Value in Dropdown.OptionItems do 
                 Dropdown:Add(Value)
             end
 
