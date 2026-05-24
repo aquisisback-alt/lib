@@ -231,6 +231,7 @@ local Library = {
     end
 
     Library.Create = function(Self, Class, Properties)
+        local lib = Self or Library
         local Data = {
             Class = Class,
             Properties = Properties,
@@ -239,12 +240,12 @@ local Library = {
 
         for Index, Value in pairs(Properties) do 
             if Index == "FontFace" then
-                Data.Instance[Index] = Self.Font or Library.Font
+                Data.Instance[Index] = lib.Font
                 continue
             end
 
             if Index == "TextSize" then 
-                Data.Instance[Index] = Self.FontSize or Library.FontSize
+                Data.Instance[Index] = lib.FontSize
                 continue
             end
 
