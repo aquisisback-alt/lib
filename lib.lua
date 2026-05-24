@@ -249,11 +249,6 @@ local Library = {
                 continue
             end
 
-            if Index == "Name" then 
-                Data.Instance[Index] = "\0"
-                continue
-            end
-
             if Class == "TextButton" then 
                 if Index == "AutoButtonColor" then 
                     Data.Instance[Index] = false
@@ -3714,7 +3709,7 @@ local Library = {
                 Items["SearchIcon"]:Tween({ImageColor3 = Library.Theme["Inactive Text"]})
             end)
 
-            for Index, Value in Dropdown.OptionItems do 
+            for Index, Value in pairs(Dropdown.OptionItems) do 
                 Dropdown:Add(Value)
             end
 
