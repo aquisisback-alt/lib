@@ -1,7 +1,5 @@
 --[[
-    Made by samet
-
-    example/documentation is at the bottom
+    Made by samet (claude, deepseek, chatgpt & open source paste)
     date: 4/16/2026 12:09 AM
 
     If you have any issues or bugs, please let me know in the ticket or dms.
@@ -2365,6 +2363,133 @@ local Library = {
 
             Window:Center()
             return setmetatable(Window, Library)
+        end
+
+        Library.External = function(Self, Params)
+            Params = Params or { }
+
+            local External = {
+                Name = Params.Name or Params.name or "External",
+                Logo = Params.Logo or Params.logo or "rbxassetid://73982265927441",
+                Size = Params.Size or Params.size or UDim2.new(0, 600, 0, 450),
+
+                IsOpen = true,
+                Items = { }
+            }
+
+            local Items = { } do 
+                Items["MainFrame"] = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Library.Holder.Instance,
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    BackgroundTransparency = 0.1,
+                    Position = UDim2.new(0.5, 0, 0.5, 0),
+                    Size = External.Size,
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Background"]
+                }):AddToTheme({BackgroundColor3 = 'Background'})
+
+                Items["MainFrame"]:MakeDraggable()
+                Items["MainFrame"]:MakeResizeable(Vector2.new(100, 100))
+                
+                Library:Create("UICorner", {
+                    Name = "\0",
+                    Parent = Items["MainFrame"].Instance,
+                    CornerRadius = UDim.new(0, 14)
+                })
+                
+                Library:Create("UIStroke", {
+                    Name = "\0",
+                    Parent = Items["MainFrame"].Instance,
+                    Color = Library.Theme["Outline"],
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                }):AddToTheme({Color = 'Outline'})
+
+                Items["TopBar"] = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["MainFrame"].Instance,
+                    Size = UDim2.new(1, 0, 0, 40),
+                    BackgroundColor3 = Library.Theme["Top"],
+                    BorderSizePixel = 0
+                }):AddToTheme({BackgroundColor3 = 'Top'})
+
+                Library:Create("UICorner", {
+                    Name = "\0",
+                    Parent = Items["TopBar"].Instance,
+                    CornerRadius = UDim.new(0, 14)
+                })
+                
+                Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["TopBar"].Instance,
+                    AnchorPoint = Vector2.new(0, 1),
+                    Position = UDim2.new(0, 0, 1, 0),
+                    Size = UDim2.new(1, 0, 0, 10),
+                    BackgroundColor3 = Library.Theme["Top"],
+                    BorderSizePixel = 0
+                }):AddToTheme({BackgroundColor3 = 'Top'})
+
+                Items["Logo"] = Library:Create("ImageLabel", {
+                    Name = "\0",
+                    Parent = Items["TopBar"].Instance,
+                    ImageColor3 = Library.Theme["Accent"],
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    Image = External.Logo,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0, 12, 0.5, 0),
+                    Size = UDim2.new(0, 24, 0, 24),
+                    BorderSizePixel = 0
+                }):AddToTheme({ImageColor3 = 'Accent'})
+
+                Items["Title"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = 16,
+                    Parent = Items["TopBar"].Instance,
+                    TextColor3 = Library.Theme["Text"],
+                    Text = External.Name,
+                    Position = UDim2.new(0, 45, 0, 0),
+                    Size = UDim2.new(0, 200, 1, 0),
+                    BackgroundTransparency = 1,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                }):AddToTheme({TextColor3 = 'Text'})
+
+                Items["Close"] = Library:Create("TextButton", {
+                    Name = "\0",
+                    Parent = Items["TopBar"].Instance,
+                    Size = UDim2.new(0, 40, 0, 40),
+                    Position = UDim2.new(1, -40, 0, 0),
+                    BackgroundTransparency = 1,
+                    Text = "✕",
+                    TextColor3 = Library.Theme["Inactive Text"],
+                    TextSize = 18,
+                    Font = Enum.Font.GothamBold
+                }):AddToTheme({TextColor3 = 'Inactive Text'})
+
+                Items["Content"] = Library:Create("Frame", {
+                     Name = "\0",
+                     Parent = Items["MainFrame"].Instance,
+                     Position = UDim2.new(0, 0, 0, 40),
+                     Size = UDim2.new(1, 0, 1, -40),
+                     BackgroundTransparency = 1,
+                     BorderSizePixel = 0
+                 })
+
+                 External.ColumnsData = { Items["Content"] }
+                 External.Window = External
+                 External.Items = Items
+             end
+
+            function External:SetOpen(Bool)
+                External.IsOpen = Bool
+                Items["MainFrame"]:FadeDescendants(Bool)
+            end
+
+            Items["Close"]:Connect("MouseButton1Down", function()
+                External:SetOpen(false)
+            end)
+
+            return setmetatable(External, Library)
         end
 
         Library.Page = function(Self, Params)
