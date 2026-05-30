@@ -2460,11 +2460,17 @@ local Library = {
                     Size = UDim2.new(0, 40, 0, 40),
                     Position = UDim2.new(1, -40, 0, 0),
                     BackgroundTransparency = 1,
-                    Text = "✕",
+                    Text = "X",
                     TextColor3 = Library.Theme["Inactive Text"],
                     TextSize = 18,
                     Font = Enum.Font.GothamBold
                 }):AddToTheme({TextColor3 = 'Inactive Text'})
+
+                Items["Close"]:OnHover(function()
+                    Items["Close"]:Tween({TextColor3 = Color3.fromRGB(137, 188, 255)})
+                end, function()
+                    Items["Close"]:Tween({TextColor3 = Library.Theme["Inactive Text"]})
+                end)
 
                 Items["Content"] = Library:Create("Frame", {
                      Name = "\0",
