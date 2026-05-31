@@ -904,29 +904,45 @@ local Library = {
         local Holder = Instance.new("Model")
         Holder.Parent = Viewport
 
-        local PartL = Instance.new("Part")
-        PartL.Size = Vector3.new(1, 3.5, 0.5)
-        PartL.Color = Color3.fromRGB(255, 255, 255)
-        PartL.Material = Enum.Material.Neon
-        PartL.Transparency = 0.5
-        PartL.Anchored = true
-        PartL.Parent = Holder
+        local PartL_V = Instance.new("Part")
+        PartL_V.Size = Vector3.new(0.8, 3.5, 0.5)
+        PartL_V.Color = Color3.fromRGB(255, 255, 255)
+        PartL_V.Material = Enum.Material.Neon
+        PartL_V.Transparency = 0
+        PartL_V.Anchored = true
+        PartL_V.Parent = Holder
 
-        local PartH = Instance.new("Part")
-        PartH.Size = Vector3.new(1, 3.5, 0.5)
-        PartH.Color = Color3.fromRGB(255, 255, 255)
-        PartH.Material = Enum.Material.Neon
-        PartH.Transparency = 0.5
-        PartH.Anchored = true
-        PartH.Parent = Holder
+        local PartL_B = Instance.new("Part")
+        PartL_B.Size = Vector3.new(1.2, 0.8, 0.5)
+        PartL_B.Color = Color3.fromRGB(255, 255, 255)
+        PartL_B.Material = Enum.Material.Neon
+        PartL_B.Transparency = 0
+        PartL_B.Anchored = true
+        PartL_B.Parent = Holder
 
-        local PartMid = Instance.new("Part")
-        PartMid.Size = Vector3.new(1, 0.8, 0.5)
-        PartMid.Color = Color3.fromRGB(255, 255, 255)
-        PartMid.Material = Enum.Material.Neon
-        PartMid.Transparency = 0.5
-        PartMid.Anchored = true
-        PartMid.Parent = Holder
+        local PartH_L = Instance.new("Part")
+        PartH_L.Size = Vector3.new(0.8, 3.5, 0.5)
+        PartH_L.Color = Color3.fromRGB(255, 255, 255)
+        PartH_L.Material = Enum.Material.Neon
+        PartH_L.Transparency = 0
+        PartH_L.Anchored = true
+        PartH_L.Parent = Holder
+
+        local PartH_R = Instance.new("Part")
+        PartH_R.Size = Vector3.new(0.8, 3.5, 0.5)
+        PartH_R.Color = Color3.fromRGB(255, 255, 255)
+        PartH_R.Material = Enum.Material.Neon
+        PartH_R.Transparency = 0
+        PartH_R.Anchored = true
+        PartH_R.Parent = Holder
+
+        local PartH_M = Instance.new("Part")
+        PartH_M.Size = Vector3.new(1.2, 0.8, 0.5)
+        PartH_M.Color = Color3.fromRGB(255, 255, 255)
+        PartH_M.Material = Enum.Material.Neon
+        PartH_M.Transparency = 0
+        PartH_M.Anchored = true
+        PartH_M.Parent = Holder
 
         -- Floating/Rotating animation
         RunService.RenderStepped:Connect(function()
@@ -935,9 +951,11 @@ local Library = {
                 -- Base rotation around its own center
                 local centerCF = CFrame.new(0, math.sin(t * 2) * 0.3, 0) * CFrame.Angles(0, t * 2, 0)
                 
-                PartL.CFrame = centerCF * CFrame.new(-0.8, 0, 0)
-                PartH.CFrame = centerCF * CFrame.new(0.8, 0, 0)
-                PartMid.CFrame = centerCF * CFrame.new(0, 0, 0)
+                PartL_V.CFrame = centerCF * CFrame.new(-1.6, 0, 0)
+                PartL_B.CFrame = centerCF * CFrame.new(-1.1, -1.35, 0)
+                PartH_L.CFrame = centerCF * CFrame.new(0.5, 0, 0)
+                PartH_R.CFrame = centerCF * CFrame.new(1.9, 0, 0)
+                PartH_M.CFrame = centerCF * CFrame.new(1.2, 0, 0)
             end
         end)
 
