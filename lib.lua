@@ -905,7 +905,7 @@ local Library = {
         Holder.Parent = Viewport
 
         local PartL_V = Instance.new("Part")
-        PartL_V.Size = Vector3.new(0.8, 3.5, 0.5)
+        PartL_V.Size = Vector3.new(0.8, 4.8, 0.5)
         PartL_V.Color = Color3.fromRGB(255, 255, 255)
         PartL_V.Material = Enum.Material.Neon
         PartL_V.Transparency = 0
@@ -913,7 +913,7 @@ local Library = {
         PartL_V.Parent = Holder
 
         local PartL_B = Instance.new("Part")
-        PartL_B.Size = Vector3.new(1.2, 0.8, 0.5)
+        PartL_B.Size = Vector3.new(1.8, 0.8, 0.5)
         PartL_B.Color = Color3.fromRGB(255, 255, 255)
         PartL_B.Material = Enum.Material.Neon
         PartL_B.Transparency = 0
@@ -949,13 +949,14 @@ local Library = {
             if Viewport.Visible then
                 local t = tick()
                 -- Base rotation around its own center
-                local centerCF = CFrame.new(0, math.sin(t * 2) * 0.3, 0) * CFrame.Angles(0, t * 2, 0)
+                local centerCF = CFrame.new(0, math.sin(t * 2) * 0.3, 0) * CFrame.Angles(0, t * 3, 0)
                 
-                PartL_V.CFrame = centerCF * CFrame.new(-1.6, 0, 0)
-                PartL_B.CFrame = centerCF * CFrame.new(-1.1, -1.35, 0)
-                PartH_L.CFrame = centerCF * CFrame.new(0.5, 0, 0)
-                PartH_R.CFrame = centerCF * CFrame.new(1.9, 0, 0)
-                PartH_M.CFrame = centerCF * CFrame.new(1.2, 0, 0)
+                -- Visually "LH" by putting L at positive X and H at negative X (due to viewport orientation)
+                PartL_V.CFrame = centerCF * CFrame.new(1.6, 0.5, 0)
+                PartL_B.CFrame = centerCF * CFrame.new(1.1, -1.5, 0)
+                PartH_L.CFrame = centerCF * CFrame.new(-0.5, 0, 0)
+                PartH_R.CFrame = centerCF * CFrame.new(-1.9, 0, 0)
+                PartH_M.CFrame = centerCF * CFrame.new(-1.2, 0, 0)
             end
         end)
 
