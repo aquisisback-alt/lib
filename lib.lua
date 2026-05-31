@@ -905,7 +905,7 @@ local Library = {
         Holder.Parent = Viewport
 
         local PartL_V = Instance.new("Part")
-        PartL_V.Size = Vector3.new(0.6, 5.0, 0.5)
+        PartL_V.Size = Vector3.new(0.5, 5.0, 0.5)
         PartL_V.Color = Color3.fromRGB(255, 255, 255)
         PartL_V.Material = Enum.Material.Neon
         PartL_V.Transparency = 0
@@ -913,7 +913,7 @@ local Library = {
         PartL_V.Parent = Holder
 
         local PartL_B = Instance.new("Part")
-        PartL_B.Size = Vector3.new(2.2, 0.6, 0.5)
+        PartL_B.Size = Vector3.new(2.5, 0.5, 0.5)
         PartL_B.Color = Color3.fromRGB(255, 255, 255)
         PartL_B.Material = Enum.Material.Neon
         PartL_B.Transparency = 0
@@ -921,7 +921,7 @@ local Library = {
         PartL_B.Parent = Holder
 
         local PartH_L = Instance.new("Part")
-        PartH_L.Size = Vector3.new(0.6, 3.5, 0.5)
+        PartH_L.Size = Vector3.new(0.5, 3.5, 0.5)
         PartH_L.Color = Color3.fromRGB(255, 255, 255)
         PartH_L.Material = Enum.Material.Neon
         PartH_L.Transparency = 0
@@ -929,7 +929,7 @@ local Library = {
         PartH_L.Parent = Holder
 
         local PartH_R = Instance.new("Part")
-        PartH_R.Size = Vector3.new(0.6, 3.5, 0.5)
+        PartH_R.Size = Vector3.new(0.5, 3.5, 0.5)
         PartH_R.Color = Color3.fromRGB(255, 255, 255)
         PartH_R.Material = Enum.Material.Neon
         PartH_R.Transparency = 0
@@ -937,7 +937,7 @@ local Library = {
         PartH_R.Parent = Holder
 
         local PartH_M = Instance.new("Part")
-        PartH_M.Size = Vector3.new(1.4, 0.6, 0.5)
+        PartH_M.Size = Vector3.new(1.5, 0.5, 0.5)
         PartH_M.Color = Color3.fromRGB(255, 255, 255)
         PartH_M.Material = Enum.Material.Neon
         PartH_M.Transparency = 0
@@ -945,18 +945,20 @@ local Library = {
         PartH_M.Parent = Holder
 
         -- Floating/Rotating animation
+        local rot = 0
         RunService.RenderStepped:Connect(function()
             if Viewport.Visible then
-                local t = tick()
-                -- Smooth slow nonstop rotation
-                local centerCF = CFrame.new(0, math.sin(t * 1.5) * 0.2, 0) * CFrame.Angles(0, t * 1.2, 0)
+                rot = rot + 0.03
+                local floatY = math.sin(tick() * 1.5) * 0.3
+                local centerCF = CFrame.new(0, floatY, 0) * CFrame.Angles(0, rot, 0)
                 
-                -- Positions relative to group center to visually read "LH"
-                PartL_V.CFrame = centerCF * CFrame.new(-2.0, 0.5, 0)
-                PartL_B.CFrame = centerCF * CFrame.new(-1.2, -1.7, 0)
-                PartH_L.CFrame = centerCF * CFrame.new(0.5, 0, 0)
-                PartH_R.CFrame = centerCF * CFrame.new(1.9, 0, 0)
-                PartH_M.CFrame = centerCF * CFrame.new(1.2, 0, 0)
+                -- Redesigned for better spacing and L shape
+                PartL_V.CFrame = centerCF * CFrame.new(-2.8, 0.6, 0)
+                PartL_B.CFrame = centerCF * CFrame.new(-1.8, -1.6, 0)
+                
+                PartH_L.CFrame = centerCF * CFrame.new(0.8, 0, 0)
+                PartH_R.CFrame = centerCF * CFrame.new(2.8, 0, 0)
+                PartH_M.CFrame = centerCF * CFrame.new(1.8, 0, 0)
             end
         end)
 
