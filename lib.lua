@@ -890,49 +890,54 @@ local Library = {
     -- ── 3D OVERLAY (LH) ──────────────────────────────────────────────────
     Library.LH_Overlay = (function()
         local Viewport = Instance.new("ViewportFrame")
-        Viewport.Size = UDim2.new(0, 150, 0, 150)
-        Viewport.Position = UDim2.new(0, 20, 0.5, -75) -- Middle left
+        Viewport.Size = UDim2.new(0, 300, 0, 300)
+        Viewport.Position = UDim2.new(0.5, -150, 0.5, -150) -- Exact center
         Viewport.BackgroundTransparency = 1
         Viewport.Visible = false
         Viewport.ZIndex = 100
         Viewport.Parent = Library.Holder.Instance
 
         local Cam = Instance.new("Camera")
-        Cam.CFrame = CFrame.new(Vector3.new(0, 0, 5), Vector3.new(0, 0, 0))
+        Cam.CFrame = CFrame.new(Vector3.new(0, 0, 8), Vector3.new(0, 0, 0))
         Viewport.CurrentCamera = Cam
 
+        local Holder = Instance.new("Model")
+        Holder.Parent = Viewport
+
         local PartL = Instance.new("Part")
-        PartL.Size = Vector3.new(1.5, 3.5, 0.5)
-        PartL.Position = Vector3.new(-1, 0, 0)
+        PartL.Size = Vector3.new(1, 3.5, 0.5)
         PartL.Color = Color3.fromRGB(255, 255, 255)
         PartL.Material = Enum.Material.Neon
+        PartL.Transparency = 0.5
         PartL.Anchored = true
-        PartL.Parent = Viewport
+        PartL.Parent = Holder
 
         local PartH = Instance.new("Part")
-        PartH.Size = Vector3.new(1.5, 3.5, 0.5)
-        PartH.Position = Vector3.new(1, 0, 0)
+        PartH.Size = Vector3.new(1, 3.5, 0.5)
         PartH.Color = Color3.fromRGB(255, 255, 255)
         PartH.Material = Enum.Material.Neon
+        PartH.Transparency = 0.5
         PartH.Anchored = true
-        PartH.Parent = Viewport
+        PartH.Parent = Holder
 
         local PartMid = Instance.new("Part")
-        PartMid.Size = Vector3.new(1.5, 0.8, 0.5)
-        PartMid.Position = Vector3.new(0, 0, 0)
+        PartMid.Size = Vector3.new(1, 0.8, 0.5)
         PartMid.Color = Color3.fromRGB(255, 255, 255)
         PartMid.Material = Enum.Material.Neon
+        PartMid.Transparency = 0.5
         PartMid.Anchored = true
-        PartMid.Parent = Viewport
+        PartMid.Parent = Holder
 
         -- Floating/Rotating animation
         RunService.RenderStepped:Connect(function()
             if Viewport.Visible then
                 local t = tick()
-                local cf = CFrame.new(0, math.sin(t * 2) * 0.2, 0) * CFrame.Angles(0, t, 0)
-                PartL.CFrame = cf * CFrame.new(-1, 0, 0)
-                PartH.CFrame = cf * CFrame.new(1, 0, 0)
-                PartMid.CFrame = cf * CFrame.new(0, 0, 0)
+                -- Base rotation around its own center
+                local centerCF = CFrame.new(0, math.sin(t * 2) * 0.3, 0) * CFrame.Angles(0, t * 2, 0)
+                
+                PartL.CFrame = centerCF * CFrame.new(-0.8, 0, 0)
+                PartH.CFrame = centerCF * CFrame.new(0.8, 0, 0)
+                PartMid.CFrame = centerCF * CFrame.new(0, 0, 0)
             end
         end)
 
@@ -3414,7 +3419,7 @@ local Library = {
                 OptionItems = Params.Items or Params.items or { },
                 Flag = Params.Flag or Params.flag or (Params.Name or Params.name),
                 Default = Params.Default or Params.default or "",
-                MaxSize = Params.MaxSize or Params.maxsize or 120,
+                MaxSize = Params.MaxSize or Params.maxsize or 138,
                 Callback = Params.Callback or Params.callback or function() end,
                 Multi = Params.Multi or Params.multi or false,
 
@@ -3596,13 +3601,24 @@ local Library = {
                     ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
                     Active = true,
                     AutomaticCanvasSize = Enum.AutomaticSize.Y,
-                    ScrollBarThickness = 0,
+                    ScrollBarThickness = 3,
                     Size = UDim2.new(1, -20, 1, -55),
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 10, 0, 45),
                     BorderSizePixel = 0,
-                    CanvasSize = UDim2.new(0, 0, 0, 0)
+                    CanvasSize = UDim2.new(0, 0, 0, 0),
+                    ScrollingDirection = Enum.ScrollingDirection.Y
                 })
+                
+                -- Slower scrolling logic
+                Items["Holder"].Instance.MouseWheelForward:Connect(function()
+                    Items["Holder"].Instance.CanvasPosition = Vector2.new(0, math.max(0, Items["Holder"].Instance.CanvasPosition.Y - 20))
+                end)
+                Items["Holder"].Instance.MouseWheelBackward:Connect(function()
+                    Items["Holder"].Instance.CanvasPosition = Vector2.new(0, Items["Holder"].Instance.CanvasPosition.Y + 20)
+                end)
+                Items["Holder"].Instance.ScrollingEnabled = false -- Disable default scrolling to use our slower one
+                Items["Holder"].Instance.Active = true
                 
                 Library:Create("UIListLayout", {
                     Name = "\0",
