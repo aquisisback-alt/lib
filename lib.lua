@@ -887,6 +887,58 @@ local Library = {
         ResetOnSpawn = false
     })
 
+    -- ── 3D OVERLAY (LH) ──────────────────────────────────────────────────
+    Library.LH_Overlay = (function()
+        local Viewport = Instance.new("ViewportFrame")
+        Viewport.Size = UDim2.new(0, 150, 0, 150)
+        Viewport.Position = UDim2.new(0, 20, 0.5, -75) -- Middle left
+        Viewport.BackgroundTransparency = 1
+        Viewport.Visible = false
+        Viewport.ZIndex = 100
+        Viewport.Parent = Library.Holder.Instance
+
+        local Cam = Instance.new("Camera")
+        Cam.CFrame = CFrame.new(Vector3.new(0, 0, 5), Vector3.new(0, 0, 0))
+        Viewport.CurrentCamera = Cam
+
+        local PartL = Instance.new("Part")
+        PartL.Size = Vector3.new(1.5, 3.5, 0.5)
+        PartL.Position = Vector3.new(-1, 0, 0)
+        PartL.Color = Color3.fromRGB(255, 255, 255)
+        PartL.Material = Enum.Material.Neon
+        PartL.Anchored = true
+        PartL.Parent = Viewport
+
+        local PartH = Instance.new("Part")
+        PartH.Size = Vector3.new(1.5, 3.5, 0.5)
+        PartH.Position = Vector3.new(1, 0, 0)
+        PartH.Color = Color3.fromRGB(255, 255, 255)
+        PartH.Material = Enum.Material.Neon
+        PartH.Anchored = true
+        PartH.Parent = Viewport
+
+        local PartMid = Instance.new("Part")
+        PartMid.Size = Vector3.new(1.5, 0.8, 0.5)
+        PartMid.Position = Vector3.new(0, 0, 0)
+        PartMid.Color = Color3.fromRGB(255, 255, 255)
+        PartMid.Material = Enum.Material.Neon
+        PartMid.Anchored = true
+        PartMid.Parent = Viewport
+
+        -- Floating/Rotating animation
+        RunService.RenderStepped:Connect(function()
+            if Viewport.Visible then
+                local t = tick()
+                local cf = CFrame.new(0, math.sin(t * 2) * 0.2, 0) * CFrame.Angles(0, t, 0)
+                PartL.CFrame = cf * CFrame.new(-1, 0, 0)
+                PartH.CFrame = cf * CFrame.new(1, 0, 0)
+                PartMid.CFrame = cf * CFrame.new(0, 0, 0)
+            end
+        end)
+
+        return Viewport
+    end)()
+
     Library.NotifHolder = Library:Create("Frame", {
         Name = "\0",
         Parent = Library.Holder.Instance,
@@ -2297,6 +2349,12 @@ local Library = {
                 Debounce = true 
 
                 Window.IsOpen = Bool
+                
+                -- Toggle LH Overlay visibility
+                if Library.LH_Overlay then
+                    Library.LH_Overlay.Visible = Bool
+                end
+
                 Items["MainFrame"]:FadeDescendants(Bool, function()
                     Debounce = false
                 end)
