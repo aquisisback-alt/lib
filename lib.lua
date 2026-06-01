@@ -2490,13 +2490,25 @@ local Library = {
                 Items = { }
             }
 
+            local Screen = Library:Create("ScreenGui", {
+                Parent = gethui(),
+                IgnoreGuiInset = true,
+                Name = "\0",
+                DisplayOrder = 2000, -- Highest priority
+                ZIndexBehavior = Enum.ZIndexBehavior.Global,
+                ResetOnSpawn = false
+            })
+            External.Screen = Screen
+
             local Items = { } do 
                 Items["MainFrame"] = Library:Create("Frame", {
                     Name = "\0",
-                    Parent = Library.Holder.Instance,
+                    Parent = Screen.Instance,
                     AnchorPoint = Vector2.new(0.5, 0.5),
                     BackgroundTransparency = 0.1,
                     Position = UDim2.new(0.5, 0, 0.5, 0),
+                    Active = true, -- Capture background clicks
+                    Selectable = true,
                     Size = External.Size,
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Background"]
