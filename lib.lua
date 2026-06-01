@@ -875,6 +875,7 @@ local Library = {
         Parent = gethui(),
         IgnoreGuiInset = true,
         Name = "\0",
+        DisplayOrder = 10,
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
         ResetOnSpawn = false
     })
@@ -883,6 +884,15 @@ local Library = {
         Parent = gethui(),
         Name = "\0",
         Enabled = false,
+        ZIndexBehavior = Enum.ZIndexBehavior.Global,
+        ResetOnSpawn = false
+    })
+
+    Library.LH_Holder = Library:Create("ScreenGui", {
+        Parent = gethui(),
+        IgnoreGuiInset = true,
+        Name = "\0",
+        DisplayOrder = 1, -- Lower than main UI
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
         ResetOnSpawn = false
     })
@@ -896,8 +906,8 @@ local Library = {
             Viewport.Position = UDim2.new(0.5, -150, 0.5, -150) -- Exact center
             Viewport.BackgroundTransparency = 1
             Viewport.Visible = false
-            Viewport.ZIndex = 100
-            Viewport.Parent = Library.Holder.Instance
+            Viewport.ZIndex = 1
+            Viewport.Parent = Library.LH_Holder.Instance
 
             local Cam = Instance.new("Camera")
             Cam.CFrame = CFrame.new(Vector3.new(0, 0, 8), Vector3.new(0, 0, 0))
@@ -2269,7 +2279,7 @@ local Library = {
                     AnchorPoint = Vector2.new(0, 0.5),
                     Size = UDim2.new(0, 0, 0, 15),
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 50, 0.5, -2),
+                    Position = UDim2.new(0, 35, 0.5, -2),
                     BorderSizePixel = 0,
                     AutomaticSize = Enum.AutomaticSize.X,
                     BackgroundColor3 = Library.Theme["Text"]
