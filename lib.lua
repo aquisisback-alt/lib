@@ -2613,6 +2613,7 @@ local Library = {
 
             function External:SetOpen(Bool)
                 External.IsOpen = Bool
+                Items["MainFrame"].Instance.Visible = Bool
                 Items["MainFrame"]:FadeDescendants(Bool)
             end
 
