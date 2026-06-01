@@ -259,11 +259,6 @@ local Library = {
                     Data.Instance[Property] = false
                     continue
                 end
-
-                if Property == "Text" then 
-                    Data.Instance[Property] = ""
-                    continue
-                end
             end
 
             Data.Instance[Index] = Property
